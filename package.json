@@ -50,6 +50,8 @@
     "bench:cap:economics": "node bench/cap/economics.mjs",
     "bench:cap:live": "npm run build && node bench/cap/live.mjs",
     "bench:cap:standalones": "node bench/cap/standalone-local.mjs",
+    "bench:cap:stage-isolated": "bash scripts/stage-cap-isolated.sh",
+    "bench:cap:isolated": "node bench/cap/standalone-isolated.mjs",
     "bench:cap:behavior": "node bench/cap/behavior-matrix.mjs",
     "bench:render:browser": "npm run build && node bench/render/browser-calibration.mjs",
     "bench:render:llvmpipe": "npm run build && bash scripts/bench-render-llvmpipe.sh",

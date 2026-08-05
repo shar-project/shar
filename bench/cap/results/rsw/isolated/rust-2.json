@@ -1,0 +1,296 @@
+{
+  "schema": "shar-cap-live-reference-v1",
+  "environment": {
+    "captured_at": "2026-08-05T16:43:58.225Z",
+    "node": "v26.3.0",
+    "v8": "14.6.202.34-node.20",
+    "os": "linux 7.1.5-gentoo-dist-hardened",
+    "arch": "x64",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-1255U",
+    "logical_cpus": 12,
+    "load_average": [2.5, 2.71, 2.47],
+    "host": "#1 SMP PREEMPT_DYNAMIC Mon Aug  3 17:55:56 AEST 2026"
+  },
+  "inputs": {
+    "shar_endpoint": "http://127.0.0.1:4311",
+    "cap_endpoint_origin": "http://127.0.0.1:4310",
+    "cap": {
+      "schema": "shar-cap-inputs-v1",
+      "standalone": {
+        "tag": "standalone@3.1.8",
+        "commit": "1d4f246d29b691275ce0edbbc8290198ebf8bde8",
+        "repository": "https://github.com/tiagozip/cap.git",
+        "corePackage": "capjs-core@0.1.1"
+      },
+      "widget": {
+        "tag": "widget@0.1.56",
+        "commit": "7849efa7f9ee19694c6f5ba73d0e7f82d37d086f",
+        "package": "cap-widget@0.1.56",
+        "integrity": "sha512-mAoFWzouxCjvi0B0Y0s7cRGGaLvJxifMVeNIHiFCkZme/9BOASWliN0aqz9wTUdlrt3Awm0UEA8h8DV1IDUuug=="
+      },
+      "wasm": {
+        "package": "@cap.js/wasm@0.0.7",
+        "integrity": "sha512-IgUjrPOUBaOjTp+BkrhfEBBeQ4An7fQiSWWezDy9Uvd+OdTYm4+h3AJU0j/CpHYayp7FltZU+UePC6p28oGQaw==",
+        "browserPath": "browser/cap_wasm_bg.wasm"
+      }
+    },
+    "cap_declared_settings": {
+      "challengeCount": 80,
+      "saltSize": 32,
+      "difficulty": 4,
+      "instrumentation": false,
+      "rsw": true,
+      "rswT": 75000
+    },
+    "origin": "http://localhost:3000",
+    "samples": 1,
+    "issue_operations": 3000,
+    "concurrency": 32,
+    "http_client_workers": 8,
+    "http_client": "recorded Node worker pool with fixed total concurrency and per-worker HTTP/1.1 keep-alive agents; latency is request start through response headers",
+    "shar_action_cardinality": 1,
+    "rss_interval_ms": 100,
+    "rss_request_timeout_ms": 10000,
+    "rss_sources": {
+      "SHAR_BENCH_PID": "remote_control",
+      "CAP_BENCH_PID": "remote_control"
+    }
+  },
+  "warnings": [
+    "Node CPU reference solve times are not accelerated-browser or energy evidence.",
+    "Live endpoint throughput includes loopback/network and configured storage latency.",
+    "Shar issuance uses 1 action scope(s); set SHAR_BENCH_ACTION_CARDINALITY=3000 for the high-cardinality abuse profile.",
+    "RSS samples come from the authenticated server-host controller; the enclosing isolated harness must validate server identity and stabilized idle memory."
+  ],
+  "behavior": {
+    "shar_origin_request": {
+      "status": 200,
+      "body_shape": [
+        "fallback",
+        "presence",
+        "quote",
+        "render",
+        "time_lock",
+        "token",
+        "trust"
+      ]
+    },
+    "cap_raw_request": {
+      "status": 200,
+      "body_shape": ["challenges", "expires", "format", "token"]
+    },
+    "cap_browser_like_request": {
+      "status": 200,
+      "body_shape": ["challenges", "expires", "format", "token"]
+    }
+  },
+  "idle_memory": { "shar_rss_bytes": 11993088, "cap_rss_bytes": 164831232 },
+  "issuance": {
+    "shar": {
+      "operations": 3000,
+      "concurrency": 32,
+      "elapsed_ms": 14421.913791,
+      "operations_per_second": 208.01677526821376,
+      "latency": {
+        "samples": 3000,
+        "min_ms": 54.813334000000395,
+        "median_ms": 128.65151499999956,
+        "p95_ms": 246.642296,
+        "max_ms": 543.3326280000001,
+        "mean_ms": 152.43476174500003
+      },
+      "response_body_bytes": {
+        "samples": 3000,
+        "min": 1640,
+        "median": 1671,
+        "p95": 1673,
+        "max": 1673,
+        "mean": 1670.3646666666666
+      },
+      "rss": {
+        "sample_count": 67,
+        "baseline_rss_bytes": 12021760,
+        "peak_rss_bytes": 14553088,
+        "final_rss_bytes": 14553088
+      },
+      "server_observed": {
+        "issued": 3000,
+        "engine_seconds": 4.237954,
+        "handler_seconds": 4.468039,
+        "mean_engine_ms": 1.4126513333333335,
+        "mean_handler_ms": 1.4893463333333332
+      }
+    },
+    "cap": {
+      "operations": 3000,
+      "concurrency": 32,
+      "elapsed_ms": 21471.918291,
+      "operations_per_second": 139.71737221342985,
+      "latency": {
+        "samples": 3000,
+        "min_ms": 19.98574599999847,
+        "median_ms": 210.33113400000002,
+        "p95_ms": 362.96582299999864,
+        "max_ms": 638.7456959999981,
+        "mean_ms": 226.63783402433356
+      },
+      "response_body_bytes": {
+        "samples": 3000,
+        "min": 2404,
+        "median": 2404,
+        "p95": 2404,
+        "max": 2404,
+        "mean": 2404
+      },
+      "rss": {
+        "sample_count": 86,
+        "baseline_rss_bytes": 95096832,
+        "peak_rss_bytes": 122662912,
+        "final_rss_bytes": 119934976
+      }
+    }
+  },
+  "cpu_reference_solve": {
+    "shar": {
+      "samples": 1,
+      "min_ms": 37.47735499999544,
+      "median_ms": 37.47735499999544,
+      "p95_ms": 37.47735499999544,
+      "max_ms": 37.47735499999544,
+      "mean_ms": 37.47735499999544
+    },
+    "cap": {
+      "samples": 1,
+      "min_ms": 248.54886300000362,
+      "median_ms": 248.54886300000362,
+      "p95_ms": 248.54886300000362,
+      "max_ms": 248.54886300000362,
+      "mean_ms": 248.54886300000362
+    }
+  },
+  "redemption": {
+    "shar": {
+      "samples": 1,
+      "min_ms": 84.85957300000155,
+      "median_ms": 84.85957300000155,
+      "p95_ms": 84.85957300000155,
+      "max_ms": 84.85957300000155,
+      "mean_ms": 84.85957300000155
+    },
+    "cap": {
+      "samples": 1,
+      "min_ms": 21.39438599999994,
+      "median_ms": 21.39438599999994,
+      "p95_ms": 21.39438599999994,
+      "max_ms": 21.39438599999994,
+      "mean_ms": 21.39438599999994
+    }
+  },
+  "ga_gates": {
+    "accelerated_p95_and_energy": {
+      "status": "not_measured",
+      "reason": "requires reference-device browser and energy instrumentation"
+    },
+    "attacker_cost_ratio": {
+      "status": "not_measured",
+      "reason": "requires calibrated attacker hardware cost inputs"
+    },
+    "server_throughput_and_memory": {
+      "status": "isolated_latency_constrained",
+      "reason": "separate-host process and memory evidence is valid, but the all-run request floor exceeds 5 ms and cannot establish the native throughput gate"
+    }
+  },
+  "isolated_deployment": {
+    "schema": "shar-cap-isolated-deployment-v1",
+    "revision": "83434b883d88ccbb86502db84e8c8b39a9acc4bc",
+    "transport": "openssh_loopback_port_forward",
+    "load_generator_environment": {
+      "captured_at": "2026-08-05T16:43:58.225Z",
+      "node": "v26.3.0",
+      "v8": "14.6.202.34-node.20",
+      "os": "linux 7.1.5-gentoo-dist-hardened",
+      "arch": "x64",
+      "cpu": "12th Gen Intel(R) Core(TM) i7-1255U",
+      "logical_cpus": 12,
+      "load_average": [2.5, 2.71, 2.47],
+      "host": "#1 SMP PREEMPT_DYNAMIC Mon Aug  3 17:55:56 AEST 2026"
+    },
+    "server_host": {
+      "schema": "shar-cap-isolated-host-v1",
+      "controller_id": "ccf919bd-eea4-4baf-a2f3-e681f76066aa",
+      "revision": "83434b883d88ccbb86502db84e8c8b39a9acc4bc",
+      "variant": "rust",
+      "state": "redis",
+      "cap_settings": {
+        "challengeCount": 80,
+        "saltSize": 32,
+        "difficulty": 4,
+        "instrumentation": false,
+        "rsw": true,
+        "rswT": 75000
+      },
+      "cap": {
+        "schema": "shar-cap-inputs-v1",
+        "standalone": {
+          "tag": "standalone@3.1.8",
+          "commit": "1d4f246d29b691275ce0edbbc8290198ebf8bde8",
+          "repository": "https://github.com/tiagozip/cap.git",
+          "corePackage": "capjs-core@0.1.1"
+        },
+        "widget": {
+          "tag": "widget@0.1.56",
+          "commit": "7849efa7f9ee19694c6f5ba73d0e7f82d37d086f",
+          "package": "cap-widget@0.1.56",
+          "integrity": "sha512-mAoFWzouxCjvi0B0Y0s7cRGGaLvJxifMVeNIHiFCkZme/9BOASWliN0aqz9wTUdlrt3Awm0UEA8h8DV1IDUuug=="
+        },
+        "wasm": {
+          "package": "@cap.js/wasm@0.0.7",
+          "integrity": "sha512-IgUjrPOUBaOjTp+BkrhfEBBeQ4An7fQiSWWezDy9Uvd+OdTYm4+h3AJU0j/CpHYayp7FltZU+UePC6p28oGQaw==",
+          "browserPath": "browser/cap_wasm_bg.wasm"
+        }
+      },
+      "server_environment": {
+        "captured_at": "2026-08-05T16:43:21.211Z",
+        "node": "v26.3.0",
+        "v8": "14.6.202.34-node.20",
+        "os": "linux 7.1.5-gentoo-dist-bin",
+        "arch": "x64",
+        "cpu": "Intel(R) Core(TM) i5-7400 CPU @ 3.00GHz",
+        "logical_cpus": 4,
+        "load_average": [0.46, 0.22, 0.13],
+        "host": "#1 SMP PREEMPT_DYNAMIC Fri Jul 24 16:19:20 -00 2026"
+      },
+      "idle_memory": { "shar_rss_bytes": 11993088, "cap_rss_bytes": 164831232 },
+      "artifacts": {
+        "host_controller_sha256": "626b04e74762697d4adccf0a1f61829800cfe1c68147205bbf39e058a8bd75d8",
+        "shar_server_sha256": "ad446dbdeb3341263390a1d2958c66252eaec7f1ad4a88586b0caeafd10a424d",
+        "cap_entry_sha256": "ae23aca3acd3ddfed0ae8653fcac5c93e7c5516a7cb31bb5503e027c8d1657e8",
+        "admin_index_sha256": "fde1572f53da5ba09d04b942fe560646a4cdd93bbc79f5b9a191ef650b90ac50"
+      },
+      "endpoints": {
+        "shar": "http://127.0.0.1:4211",
+        "cap": "http://127.0.0.1:4210/edf16423c0/",
+        "control": "http://127.0.0.1:4212"
+      },
+      "isolation": {
+        "bind": "loopback_only",
+        "controller_authentication": "bearer_token",
+        "process_model": "fresh_cap_and_shar_processes",
+        "rss": "server_host_linux_proc_vm_rss",
+        "redis_process_included": false
+      }
+    },
+    "assertions": {
+      "ssh_target_was_non_loopback": true,
+      "services_bound_to_server_loopback": true,
+      "authenticated_remote_rss": true,
+      "stabilized_server_idle_rss": true,
+      "local_and_remote_artifacts_match": true
+    },
+    "caveats": [
+      "SSH encryption and forwarding overhead are included equally in both HTTP measurements.",
+      "Redis process memory is excluded; when Redis is server-local its CPU and I/O contention remain part of the host conditions.",
+      "This server benchmark is not browser latency, energy, or attacker-economics evidence."
+    ]
+  }
+}

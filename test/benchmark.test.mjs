@@ -298,6 +298,10 @@ test("live benchmark refuses to manufacture unavailable GA evidence", async () =
   assert.match(source, /SHAR_BENCH_ENDPOINT/);
   assert.match(source, /CAP_BENCH_SETTINGS_JSON/);
   assert.match(source, /SHAR_BENCH_RSS_INTERVAL_MS/);
+  assert.match(source, /SHAR_BENCH_RSS_REQUEST_TIMEOUT_MS/);
+  assert.match(source, /_RSS_URL/);
+  assert.match(source, /SHAR_BENCH_RSS_TOKEN/);
+  assert.match(source, /remote_control/);
   assert.match(source, /SHAR_BENCH_ACTION_CARDINALITY/);
   assert.match(source, /SHAR_BENCH_CLIENT_WORKERS/);
   assert.match(source, /rssSummary/);
@@ -308,9 +312,14 @@ test("live benchmark refuses to manufacture unavailable GA evidence", async () =
   assert.match(worker, /JSON\.parse\(text\)/);
   assert.match(worker, /elapsed_ms: response\.elapsed_ms/);
   assert.match(worker, /body_bytes: response\.bytes\.byteLength/);
+  assert.match(worker, /parsed\?\.code/);
   assert.match(source, /keepAlive: true/);
   assert.match(source, /maxSockets: concurrency/);
   assert.match(source, /response\.bytes\.byteLength/);
+  assert.match(
+    source,
+    /error\.result = \{[\s\S]*?elapsed_ms: response\.elapsed_ms/,
+  );
   assert.match(source, /latency is request start through response headers/);
   assert.match(source, /sharMetricSnapshot/);
   assert.match(source, /mean_engine_ms/);
@@ -339,6 +348,53 @@ test("standalone benchmark publishes only complete paired runs", async () => {
   assert.match(source, /SHAR_BENCH_CLIENT_WORKERS/);
   assert.match(source, /CAP_BENCH_PROTOCOL/);
   assert.match(source, /rsw: capSettings\.rsw/);
+});
+
+test("isolated standalone benchmark fails closed around server evidence", async () => {
+  const isolated = await readFile(
+    new URL("../bench/cap/standalone-isolated.mjs", import.meta.url),
+    "utf8",
+  );
+  const host = await readFile(
+    new URL("../bench/cap/standalone-host.mjs", import.meta.url),
+    "utf8",
+  );
+  const staging = await readFile(
+    new URL("../scripts/stage-cap-isolated.sh", import.meta.url),
+    "utf8",
+  );
+  const packageDocument = await json("package.json");
+
+  assert.equal(
+    packageDocument.scripts["bench:cap:isolated"],
+    "node bench/cap/standalone-isolated.mjs",
+  );
+  assert.equal(
+    packageDocument.scripts["bench:cap:stage-isolated"],
+    "bash scripts/stage-cap-isolated.sh",
+  );
+  assert.match(isolated, /ExitOnForwardFailure=yes/);
+  assert.match(isolated, /ssh_target_was_non_loopback: true/);
+  assert.match(isolated, /authenticated_remote_rss: true/);
+  assert.match(isolated, /isolated_latency_constrained/);
+  assert.match(isolated, /request_floor_at_most_5ms/);
+  assert.match(isolated, /qualifyRawServerGates/);
+  assert.match(isolated, /host_controller_sha256/);
+  assert.match(isolated, /admin_index_sha256/);
+  assert.match(isolated, /server-host artifact digest differs/);
+  assert.match(
+    isolated,
+    /isolated benchmark requires a clean committed worktree/,
+  );
+  assert.match(isolated, /stagedOutputDirectory/);
+  assert.match(isolated, /await rename\(temporaryPath, path\)/);
+  assert.match(host, /listen\(port, "127\.0\.0\.1"/);
+  assert.match(host, /timingSafeEqual/);
+  assert.match(host, /\/proc\/\$\{child\.pid\}\/status/);
+  assert.match(host, /controller_authentication: "bearer_token"/);
+  assert.match(staging, /\/tmp\/shar-cap-stage-/);
+  assert.match(staging, /remote staging directory already exists/);
+  assert.doesNotMatch(staging, /rsync[^\n]*--delete/);
 });
 
 test("native issuance profiler retains an in-process Euclidean derivation baseline", async () => {
@@ -477,6 +533,51 @@ test("published RSW standalone evidence is separate and passes every native run"
     summary.local_native_thresholds.throughput_at_least_2x_cap.status,
     "pass",
   );
+});
+
+test("published isolated RSW evidence preserves its latency-constrained scope", async () => {
+  const summary = await json(
+    "bench/cap/results/rsw/isolated/isolated-standalone-comparison.json",
+  );
+  assert.equal(summary.schema, "shar-cap-isolated-standalone-comparison-v1");
+  assert.equal(summary.scope.status, "isolated_latency_constrained");
+  assert.equal(summary.inputs.repetitions, 3);
+  assert.equal(summary.inputs.issue_operations, 3_000);
+  assert.equal(summary.inputs.concurrency, 32);
+  assert.equal(summary.inputs.http_client_workers, 8);
+  assert.equal(summary.inputs.cap_settings.rsw, true);
+  assert.equal(summary.raw_results.length, 3);
+  assert.equal(summary.topology_quality.request_floor_at_most_5ms.pass, false);
+  assert.ok(summary.topology_quality.request_floor_ms.min > 5);
+  assert.equal(
+    summary.native_thresholds.idle_memory_at_most_half_cap.pass,
+    true,
+  );
+  assert.equal(summary.native_thresholds.ga_scope_pass, false);
+
+  for (const file of summary.raw_results) {
+    const result = await json(`bench/cap/results/rsw/isolated/${file}`);
+    assert.equal(
+      result.isolated_deployment.schema,
+      "shar-cap-isolated-deployment-v1",
+    );
+    assert.equal(
+      result.ga_gates.server_throughput_and_memory.status,
+      "isolated_latency_constrained",
+    );
+    assert.deepEqual(result.inputs.rss_sources, {
+      SHAR_BENCH_PID: "remote_control",
+      CAP_BENCH_PID: "remote_control",
+    });
+    assert.equal(
+      result.isolated_deployment.assertions.local_and_remote_artifacts_match,
+      true,
+    );
+    assert.doesNotMatch(
+      JSON.stringify(result),
+      /ssh\.soccera|192\.168\.|control_token|Bearer /i,
+    );
+  }
 });
 
 test("published pinned Cap behavior matrix covers policy and verification modes", async () => {

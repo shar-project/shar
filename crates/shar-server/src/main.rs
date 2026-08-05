@@ -220,6 +220,12 @@ impl Admission {
     }
 }
 
+const MAX_BLOCKING_STATE_OPERATIONS: u64 = 64;
+
+fn state_admission_limit(max_concurrent_requests: u64) -> u64 {
+    max_concurrent_requests.min(MAX_BLOCKING_STATE_OPERATIONS)
+}
+
 struct AdmissionPermit(Arc<Admission>);
 impl Drop for AdmissionPermit {
     fn drop(&mut self) {
@@ -516,7 +522,9 @@ async fn main() {
         request_log,
         max_concurrent_requests,
         state_timeout,
-        state_admission: Arc::new(Admission::new(10)),
+        state_admission: Arc::new(Admission::new(state_admission_limit(
+            max_concurrent_requests,
+        ))),
         request_body_timeout,
         readiness_admission: Arc::new(Admission::new(1)),
         admin_assets: Arc::new(admin_assets),
@@ -2546,6 +2554,9 @@ mod http_tests {
 
     #[tokio::test]
     async fn capacity_admission_is_bounded_retryable_and_recovers() {
+        assert_eq!(state_admission_limit(1), 1);
+        assert_eq!(state_admission_limit(64), 64);
+        assert_eq!(state_admission_limit(65_536), 64);
         let admission = Arc::new(Admission::new(1));
         let first = admission.try_enter().expect("first request is admitted");
         assert!(admission.try_enter().is_none());
