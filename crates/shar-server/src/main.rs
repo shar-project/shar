@@ -517,6 +517,10 @@ async fn main() {
         readiness_admission: Arc::new(Admission::new(1)),
         admin_assets: Arc::new(admin_assets),
     };
+    // `postgres::Client` owns an internal Tokio runtime and must not be dropped
+    // from this async runtime. Keep the final engine/store reference for the
+    // bounded blocking shutdown worker after the router has drained.
+    let shutdown_state = state.clone();
     let app = router(state);
     let listener = tokio::net::TcpListener::bind((listen.host.as_str(), listen.port))
         .await
@@ -557,9 +561,13 @@ async fn main() {
         }
     };
     drop(serve);
-    let flushed = tokio::task::spawn_blocking(move || buffered_audit.flush(AUDIT_SHUTDOWN_TIMEOUT))
-        .await
-        .unwrap_or(false);
+    let flushed = tokio::task::spawn_blocking(move || {
+        let flushed = buffered_audit.flush(AUDIT_SHUTDOWN_TIMEOUT);
+        drop(shutdown_state);
+        flushed
+    })
+    .await
+    .unwrap_or(false);
     if !flushed {
         eprintln!("audit queue did not drain before the bounded shutdown deadline");
     }

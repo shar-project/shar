@@ -4,6 +4,11 @@ set -euo pipefail
 : "${SHAR_TEST_POSTGRES_URL:?set SHAR_TEST_POSTGRES_URL to an isolated PostgreSQL database}"
 : "${SHAR_TEST_REDIS_URL:?set SHAR_TEST_REDIS_URL to an isolated Redis-compatible service}"
 
+postgres_url_rust=${SHAR_TEST_POSTGRES_URL_RUST:-$SHAR_TEST_POSTGRES_URL}
+postgres_url_javascript=${SHAR_TEST_POSTGRES_URL_JAVASCRIPT:-$SHAR_TEST_POSTGRES_URL}
+redis_url_rust=${SHAR_TEST_REDIS_URL_RUST:-$SHAR_TEST_REDIS_URL}
+redis_url_javascript=${SHAR_TEST_REDIS_URL_JAVASCRIPT:-$SHAR_TEST_REDIS_URL}
+
 workspace=$(cd "$(dirname "$0")/.." && pwd)
 test_directory=$(mktemp -d /tmp/shar-external-interop.XXXXXX)
 rust_pid=
@@ -36,11 +41,21 @@ wait_for_server() {
 }
 
 stop_servers() {
+  local failed=0
   kill "$javascript_pid" "$rust_pid" 2>/dev/null || true
-  wait "$javascript_pid" 2>/dev/null || true
-  wait "$rust_pid" 2>/dev/null || true
+  if ! wait "$javascript_pid"; then
+    echo "JavaScript standalone did not shut down cleanly" >&2
+    cat "$test_directory/javascript.log"
+    failed=1
+  fi
+  if ! wait "$rust_pid"; then
+    echo "Rust standalone did not shut down cleanly" >&2
+    cat "$test_directory/rust.log"
+    failed=1
+  fi
   javascript_pid=
   rust_pid=
+  return "$failed"
 }
 
 start_servers() {
@@ -50,8 +65,8 @@ start_servers() {
     SHAR_ALLOWED_ORIGINS=http://localhost:3000 \
     SHAR_TRUSTED_PROXY_CIDRS=127.0.0.1/32 \
     SHAR_ASSURANCE_MODE=trusted-header \
-    SHAR_POSTGRES_URL="$SHAR_TEST_POSTGRES_URL" \
-    SHAR_REDIS_URL="$SHAR_TEST_REDIS_URL" \
+    SHAR_POSTGRES_URL="$postgres_url_rust" \
+    SHAR_REDIS_URL="$redis_url_rust" \
     SHAR_LISTEN=127.0.0.1:4388 \
     SHAR_ADMIN_ASSETS="$workspace/dist/admin" \
     SHAR_REQUEST_LOG=0 \
@@ -65,8 +80,8 @@ start_servers() {
     SHAR_ALLOWED_ORIGINS=http://localhost:3000 \
     SHAR_TRUSTED_PROXY_CIDRS=127.0.0.1/32 \
     SHAR_ASSURANCE_MODE=trusted-header \
-    SHAR_POSTGRES_URL="$SHAR_TEST_POSTGRES_URL" \
-    SHAR_REDIS_URL="$SHAR_TEST_REDIS_URL" \
+    SHAR_POSTGRES_URL="$postgres_url_javascript" \
+    SHAR_REDIS_URL="$redis_url_javascript" \
     SHAR_LISTEN=127.0.0.1:4389 \
     SHAR_ADMIN_ASSETS="$workspace/dist/admin" \
     SHAR_REQUEST_LOG=0 \
@@ -101,4 +116,5 @@ SHAR_ROTATION_CHALLENGE="$test_directory/restart-challenge.json" \
 SHAR_KEY_FILE="$test_directory/keys.json" \
 node test/rotation-interop.mjs complete
 
+stop_servers
 echo "PostgreSQL/Redis cross-process replay and restart interoperability passed"
