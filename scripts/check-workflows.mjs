@@ -110,7 +110,7 @@ function requireContainerGate(name, text) {
     assert.match(packages, /--certificate-oidc-issuer "\$OIDC_ISSUER"/);
     assert.doesNotMatch(packages, /- run: npm (?:pack|test|ci)(?:\s|$)/);
     assert.match(security, /needs: preflight/);
-    assert.match(containers, /needs: container-security/);
+    assert.match(containers, /needs: \[container-security, packages\]/);
     assert.match(containers, /platforms: linux\/amd64,linux\/arm64/);
     assert.match(containers, /provenance: mode=max/);
     assert.match(containers, /cosign verify --certificate-identity/);
@@ -144,6 +144,11 @@ requirePinnedActions("CI", ci);
 requirePinnedActions("release", release);
 requireContainerGate("CI", ci);
 requireContainerGate("release", release);
+assert.match(
+  release,
+  /^concurrency:\n  group: release\n  cancel-in-progress: false$/m,
+  "release runs must serialize without cancelling an in-flight publication",
+);
 assert.match(
   ci,
   /^on:\n  push:\n    branches: \[main\]\n  pull_request:\n/m,

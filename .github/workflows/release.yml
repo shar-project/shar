@@ -4,6 +4,10 @@ on:
   push:
     tags: ["v*.*.*"]
 
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 permissions:
   contents: read
 
@@ -153,7 +157,7 @@ jobs:
 
   containers:
     name: Publish ${{ matrix.image }} container
-    needs: container-security
+    needs: [container-security, packages]
     runs-on: ubuntu-24.04
     environment: release
     strategy:

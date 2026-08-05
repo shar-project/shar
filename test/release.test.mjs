@@ -44,3 +44,13 @@ test("external store interop enables assurance only behind loopback trust", asyn
   );
   assert.equal(script.match(/SHAR_ASSURANCE_MODE=trusted-header/g)?.length, 2);
 });
+
+test("container publication waits for npm publication", async () => {
+  const workflow = await readFile(
+    new URL("../.github/workflows/release.yml", import.meta.url),
+    "utf8",
+  );
+  const containers = workflow.slice(workflow.indexOf("  containers:\n"));
+  assert.match(containers, /needs: \[container-security, packages\]/);
+  assert.doesNotMatch(containers, /needs: container-security(?:\n|$)/);
+});

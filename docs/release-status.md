@@ -2,6 +2,16 @@
 
 Last updated: 2026-08-05. This is implementation evidence, not a GA claim.
 
+GitHub's public-repository configuration now has an active semantic release-tag
+ruleset for `v*.*.*`: only organization administrators may create, update, or
+delete matching tags, and their target commits must have verified signatures.
+The `release` deployment environment requires explicit approval from the
+repository owner and accepts only the same tag pattern. Release workflow runs
+are serialized without cancellation, and GHCR publication cannot begin until
+the tested npm candidates have published successfully. No release tag has been
+created yet; the initial npm namespace and trusted-publisher bootstrap remains
+an external prerequisite.
+
 ## Passing local gates
 
 On x86_64 with Rust/Cargo 1.94.0 and Node 26.3.0:
