@@ -550,8 +550,8 @@ On x86_64 with Rust/Cargo 1.94.0 and Node 26.3.0:
   required Linux architectures. This caught and replaced three initially
   selected amd64 child-manifest digests: the corrected local arm64 attempt now
   pulls an actual arm64 Node binary and stops at the expected missing host
-  emulation boundary instead of silently producing relabeled x64 output. Local
-  The QEMU-backed publication build, completed multi-architecture output, and
+  emulation boundary instead of silently producing relabeled x64 output. The
+  QEMU-backed publication build, completed multi-architecture output, and
   registry publication remain open.
   The protected release now extracts BuildKit's attached SPDX document for
   each published platform, rather than asking a second scanner to interpret an
@@ -586,8 +586,12 @@ On x86_64 with Rust/Cargo 1.94.0 and Node 26.3.0:
   its published SHA-256 before use. Both workflows pass that exact actionlint,
   release-metadata, runtime smoke, exact
   candidate staging/checksum/isolated-install, and package dry-run checks.
-  Neither workflow has yet run on GitHub;
-  the release workflow also requires a configured protected environment.
+  Artifact transfer, Docker/QEMU/Buildx/build-push, and build-provenance actions
+  are pinned to their current Node 24-runtime majors. CI has passed on both pull
+  requests and `main`, including native amd64 and arm64 container scans. The
+  protected-tag workflow remains intentionally unexercised until the npm
+  namespace and trusted-publisher bootstrap are ready; its protected release
+  environment and semantic-tag rules are configured.
 - the Cap harness pins `standalone@3.1.8` and `widget@0.1.56` to exact commits
   and verifies npm integrity for the widget and its eagerly fetched WASM. A
   cold-cache Chromium capture observed no unexpected requests and measured

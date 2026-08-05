@@ -72,7 +72,15 @@ function requireContainerGate(name, text) {
   assert.match(security, /output-format: table/);
   assert.match(
     security,
-    /actions\/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4/,
+    /actions\/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a/,
+  );
+  assert.match(
+    security,
+    /docker\/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c/,
+  );
+  assert.match(
+    security,
+    /docker\/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a/,
   );
   assert.doesNotMatch(security, /registry-password|GITHUB_TOKEN/);
 
@@ -121,7 +129,11 @@ function requireContainerGate(name, text) {
     assert.match(containers, /needs: \[container-security, packages\]/);
     assert.match(
       containers,
-      /docker\/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130/,
+      /docker\/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8/,
+    );
+    assert.match(
+      containers,
+      /actions\/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373/,
     );
     assert.match(
       containers,
