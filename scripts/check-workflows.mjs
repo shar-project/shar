@@ -142,6 +142,11 @@ requirePinnedActions("CI", ci);
 requirePinnedActions("release", release);
 requireContainerGate("CI", ci);
 requireContainerGate("release", release);
+assert.match(
+  ci,
+  /^on:\n  push:\n    branches: \[main\]\n  pull_request:\n/m,
+  "CI must run feature branches through pull_request only to avoid duplicate matrices",
+);
 assert.match(job(ci, "packages"), /npm run check:base-images/);
 assert.match(job(release, "preflight"), /npm run check:base-images/);
 const packages = job(ci, "packages");
