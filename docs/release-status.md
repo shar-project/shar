@@ -176,8 +176,14 @@ On x86_64 with Rust/Cargo 1.94.0 and Node 26.3.0:
   CSS completion with the same digest, an 870× separation. Backend,
   bounded-work, digest, CSS-completion, and 10× gates pass; the device honestly
   misses the aspirational 8–16 ms latency band by 1 ms. All software artifacts
-  remain non-GA-scoped, and the full reference-device matrix is still a GA
-  gate;
+  remain non-GA-scoped. A headed Android Chrome 150 run on a physical Pixel 7
+  Pro then verified Arm Mali-G710 (`13b5`) and its r54p3 driver through CDP.
+  CPU, WebGPU, WebGL2, and CSS produced the same digest; five full-setup samples
+  measured a 39.7 ms WebGPU median, 66.3 ms WebGL2 median, and 12.11 s CSS
+  completion, a 305× separation. Correctness and speedup gates pass while the
+  mobile device honestly misses the 8–16 ms latency band. The temporary ADB
+  mappings and test tabs were removed after capture. The full reference-device
+  matrix is still a GA gate;
 - the reproducible pure-JavaScript time-lock calibration uses a retained public
   modulus from a generated 2048-bit RSW semiprime, without retaining or
   distributing its trapdoor. Five 100,000-iteration samples measured a local
@@ -661,7 +667,7 @@ remain unverified; the local Podman build and scan covered only `linux/amd64`.
 The authoritative incomplete list is in `roadmap.md`. Current rendering
 evidence covers three desktop engine families, SwiftShader, Mesa llvmpipe, one
 physical Intel Iris Xe, and one physical AMD Van Gogh Steam Deck, but not the
-required NVIDIA, Apple, Adreno, Mali, mobile, and shipping-browser version
+required NVIDIA, Apple, Adreno, wider mobile, and shipping-browser version
 matrix. PostgreSQL
 and Redis have no multi-host/failover test in
 this environment (the single-service race now passes), and the external RFC

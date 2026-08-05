@@ -122,7 +122,7 @@ function assertRenderCalibration(result) {
   return digests[0];
 }
 
-test("published render calibrations prove SwiftShader, llvmpipe, Intel, and AMD backends", async () => {
+test("published render calibrations prove software, Intel, AMD, and Mali backends", async () => {
   const result = await json(
     "bench/render/results/local-browser-calibration.json",
   );
@@ -189,6 +189,26 @@ test("published render calibrations prove SwiftShader, llvmpipe, Intel, and AMD 
   assert.equal(amd.environment.gpu.feature_status.webgpu, "enabled_readback");
   assert.equal(amd.gates.accelerated_over_css.ga_scope_pass, true);
   assert.equal(amd.gates.accelerated_latency.ga_scope_pass, false);
+
+  const mali = await json(
+    "bench/render/results/local-android-mali-g710-calibration.json",
+  );
+  const maliDigest = assertRenderCalibration(mali);
+  assert.equal(maliDigest, softwareDigest);
+  assert.equal(mali.environment.gpu_mode, "physical hardware");
+  assert.equal(mali.environment.browser_transport, "remote-cdp");
+  assert.equal(mali.method.browser_mode, "headed");
+  assert.equal(mali.method.page_transport, "adb-reverse");
+  assert.equal(mali.gates.requested_backend.requested, "physical");
+  assert.equal(mali.gates.requested_backend.observed, "physical");
+  assert.equal(mali.environment.gpu.vendor_id, 0x13b5);
+  assert.match(mali.environment.gpu.renderer, /Mali-G710/i);
+  assert.doesNotMatch(mali.environment.gpu.renderer, /SwiftShader|llvmpipe/i);
+  assert.equal(mali.environment.gpu.hardware_supports_vulkan, true);
+  assert.equal(mali.environment.gpu.feature_status.webgl, "enabled");
+  assert.equal(mali.environment.gpu.feature_status.webgpu, "enabled");
+  assert.equal(mali.gates.accelerated_over_css.ga_scope_pass, true);
+  assert.equal(mali.gates.accelerated_latency.ga_scope_pass, false);
 
   const source = await readFile(
     new URL("../bench/render/browser-calibration.mjs", import.meta.url),
