@@ -41,7 +41,7 @@ jobs:
         run: |
           npm install --prefix "$RUNNER_TEMP/shar-release-smoke" --ignore-scripts --no-audit --no-fund release/*.tgz
           node scripts/smoke-package-candidates.mjs "$RUNNER_TEMP/shar-release-smoke" "${GITHUB_REF_NAME#v}"
-      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: npm-release-candidate
           path: release/
@@ -77,7 +77,7 @@ jobs:
             cosign sign-blob --yes --bundle "${artifact}.sigstore.json" "$artifact"
             cosign verify-blob --bundle "${artifact}.sigstore.json" --certificate-identity "$CERTIFICATE_IDENTITY" --certificate-oidc-issuer "$OIDC_ISSUER" "$artifact"
           done
-      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: npm-release
           path: release/
@@ -135,7 +135,7 @@ jobs:
           only-fixed: false
           output-format: json
       - name: Retain the complete vulnerability report
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: release-container-vulnerabilities-${{ matrix.image }}-${{ matrix.arch }}
           path: ${{ steps.complete-vulnerability-report.outputs.json }}
@@ -238,7 +238,7 @@ jobs:
             cosign sign-blob --yes --bundle "${artifact}.sigstore.json" "$artifact"
             cosign verify-blob --bundle "${artifact}.sigstore.json" --certificate-identity "$CERTIFICATE_IDENTITY" --certificate-oidc-issuer "$OIDC_ISSUER" "$artifact"
           done
-      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: container-${{ matrix.image }}-release
           path: release/
