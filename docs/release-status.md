@@ -520,7 +520,15 @@ On x86_64 with Rust/Cargo 1.94.0 and Node 26.3.0:
   configurable 6–300 second total shutdown deadline (25 seconds by default),
   reserve its final five seconds for cleanup, and exit nonzero after a forced
   drain. Compose and Kubernetes allow 30 seconds for the default. The real
-  dual-standalone SIGTERM/rotation suite passes with this ordering.
+  dual-standalone SIGTERM/rotation suite passes with this ordering. The native
+  server now retains its final engine/store owner until a bounded blocking
+  shutdown worker can release synchronous PostgreSQL clients outside Tokio;
+  the external-store harness fails if either standalone exits nonzero during
+  either side of its restart test. A two-host run with both local standalones
+  sharing remote PostgreSQL and Redis through independent loopback-only SSH
+  paths passed concurrent replay exclusion, reverse-direction verification,
+  trust credits, restart, and pre-rotation challenge completion. It caught and
+  now guards against a previously CI-masked PostgreSQL-client destructor panic.
 - local loopback smoke tests started each real standalone against SQLite and
   the compiled production dashboard. Both returned the same default policy,
   liveness/readiness results, request-id contract, no-cache HTML, and strict
@@ -705,11 +713,11 @@ The authoritative incomplete list is in `roadmap.md`. Current rendering
 evidence covers three desktop engine families, SwiftShader, Mesa llvmpipe, one
 physical Intel Iris Xe, and one physical AMD Van Gogh Steam Deck, but not the
 required NVIDIA, Apple, Adreno, wider mobile, and shipping-browser version
-matrix. PostgreSQL
-and Redis have no multi-host/failover test in
-this environment (the single-service race now passes), and the external RFC
-9578 trust-credit profile remains unreviewed. Production method-specific host
-fallback deployments, the first externally verified SBOM/signing publication,
+matrix. PostgreSQL and Redis now have a two-host shared-state/restart run, but
+not a replicated-service failover or network-partition recovery run, and the
+external RFC 9578 trust-credit profile remains unreviewed. Production
+method-specific host fallback deployments, the first externally verified
+SBOM/signing publication,
 a passing isolated Cap native-throughput result, reference-device
 latency/energy/attacker-cost benchmarks, and independent cryptographic,
 privacy, rendering, and accessibility reviews also remain open.
