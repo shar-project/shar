@@ -9,7 +9,7 @@ license = "MIT"
 repository = "https://github.com/shar-project/shar"
 
 [workspace.dependencies]
-base64 = "0.22.1"
+base64 = "0.23.0"
 ed25519-dalek = { version = "2.2.0", features = ["hazmat"] }
 hmac = "0.12.1"
 rand_core = "0.6.4"
