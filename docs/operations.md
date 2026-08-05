@@ -367,13 +367,31 @@ restarts both processes, and completes work issued before the restart. The
 plaintext example is valid only for isolated test services because the script
 sets insecure-development mode internally.
 
+The same disposable services can run the deterministic partition gate (local
+ports 45432 and 46379 must be free):
+
+```sh
+SHAR_TEST_POSTGRES_URL='postgresql://shar:...@127.0.0.1/shar?sslmode=disable' \
+SHAR_TEST_REDIS_URL='redis://127.0.0.1:6379' \
+npm run test:standalone-store-partition
+```
+
+This starts both optimized standalones behind a test-only TCP fault proxy,
+severs all established PostgreSQL and Redis sockets, silently blackholes new
+connections, and restores them without restarting either server. It requires
+liveness to remain available, readiness and challenge issuance to return their
+exact bounded retryable errors, recovery to restore issuance, and both
+standalones to shut down cleanly. It validates Shar's client behavior under a
+complete local connection partition; it does not validate replication,
+election, DNS, TLS, or proxy behavior of a specific managed service.
+
 Set `SHAR_TEST_POSTGRES_TLS=0` only for an isolated local PostgreSQL process
 that has no TLS support. The harness creates the `shar_*` schema, uses unique
 test scopes, asserts exactly one winner among 64 concurrent nonce consumers,
 reconnects each configured client/pool and confirms that the first consumed
-nonce remains rejected, and exercises pressure issuance/failure/success. It is
-still a restart/reconnect smoke test, not a substitute for service-specific
-failover and network-partition testing.
+nonce remains rejected, and exercises pressure issuance/failure/success. These
+local tests are not substitutes for service-specific replicated failover and
+production-TLS testing.
 
 ## Containers
 

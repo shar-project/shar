@@ -23,7 +23,7 @@ This repository currently contains the executable v1 protocol foundation:
   of real protocol exchanges from both servers.
 
 It does **not** claim GA status. The full hardware/browser matrix, managed-store
-failover/partition/TLS and separate-host validation, the external RFC 9578
+replicated failover/TLS and broader separate-host validation, the external RFC 9578
 trust-credit profile, isolated reproduction of the locally passing
 protocol-matched native Cap throughput gate, remaining reference-device
 performance/energy benchmarks, target trace-storage retention/access-control
@@ -39,10 +39,12 @@ cargo test --workspace
 
 An isolated PostgreSQL/Redis environment can additionally run
 `npm run test:stores:live` followed by
-`npm run test:standalone-external-interop`; the latter exercises both optimized
-servers, cross-process replay races, and process restart with shared durable
-state. See [`docs/operations.md`](docs/operations.md) for the required test-only
-URLs and TLS warning.
+`npm run test:standalone-external-interop` and
+`npm run test:standalone-store-partition`; they exercise both optimized servers,
+cross-process replay races, process restart with shared durable state, complete
+connection blackholes, bounded operational errors, and recovery. See
+[`docs/operations.md`](docs/operations.md) for the required test-only URLs and
+TLS warning.
 
 `npm run test:browser` runs the rendered Chromium, Firefox, and WebKit projects.
 Install their Playwright-managed binaries and OS dependencies first with
