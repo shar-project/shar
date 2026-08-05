@@ -37,6 +37,7 @@
     "test:standalone-interop": "bash test/standalone-interop.sh",
     "test:standalone-external-interop": "bash test/standalone-external-interop.sh",
     "test:standalone-store-partition": "bash test/standalone-store-partition.sh",
+    "test:standalone-store-tls": "bash test/standalone-store-tls.sh",
     "test:stores:live": "npm run build && node test/live-stores.mjs",
     "test:browser": "npm run build && playwright test",
     "test:browser:physical": "npm run build && node scripts/test-browser-physical.mjs",

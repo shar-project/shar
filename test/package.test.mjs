@@ -514,11 +514,29 @@ test("standalones permit plaintext state services only in explicit development",
   assert.match(javascript, /plaintextPostgres/);
   assert.match(
     javascript,
+    /\["sslmode", "sslcert", "sslkey", "sslrootcert"\][\s\S]*postgresUrl\.searchParams\.delete/,
+  );
+  assert.match(
+    javascript,
     /plaintextPostgres &&\s+process\.env\.SHAR_INSECURE_DEVELOPMENT !== "1"/,
   );
   assert.match(
     javascript,
     /redisUrl\.protocol !== "rediss:" &&\s+process\.env\.SHAR_INSECURE_DEVELOPMENT !== "1"/,
+  );
+  assert.match(
+    javascript,
+    /SHAR_REDIS_CA_FILE requires a rediss SHAR_REDIS_URL/,
+  );
+  assert.match(javascript, /redisSocket\.rejectUnauthorized = true/);
+  assert.match(javascript, /redisSocket\.minVersion = "TLSv1\.2"/);
+  assert.match(
+    javascript,
+    /checkServerIdentity\(tlsVerificationHost\(postgresUrl\), certificate\)/,
+  );
+  assert.match(
+    javascript,
+    /checkServerIdentity\(tlsVerificationHost\(redisUrl\), certificate\)/,
   );
 
   const rust = await readFile(
@@ -529,8 +547,6 @@ test("standalones permit plaintext state services only in explicit development",
     rust,
     /!postgres_tls\s+&& env::var\("SHAR_INSECURE_DEVELOPMENT"\)/,
   );
-  assert.match(
-    rust,
-    /!url\.starts_with\("rediss:\/\/"\)\s+&& env::var\("SHAR_INSECURE_DEVELOPMENT"\)/,
-  );
+  assert.match(rust, /!redis_tls\s+&& env::var\("SHAR_INSECURE_DEVELOPMENT"\)/);
+  assert.match(rust, /SHAR_REDIS_CA_FILE requires a rediss SHAR_REDIS_URL/);
 });

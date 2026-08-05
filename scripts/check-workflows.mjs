@@ -228,6 +228,10 @@ assert.match(
   durableStores,
   /cargo test --locked -p shar-server postgres::tests::terminated_client_is_not_retried_and_the_next_request_reconnects -- --ignored --exact/,
 );
+assert.match(
+  durableStores,
+  /SHAR_CONTAINER_RUNTIME=docker npm run test:standalone-store-tls/,
+);
 assert.doesNotMatch(rust, /GITHUB_TOKEN|checks: write/);
 assert.match(
   rust,

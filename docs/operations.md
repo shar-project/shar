@@ -76,6 +76,7 @@ The principal settings are:
 | `SHAR_POSTGRES_URL`             | PostgreSQL connection URL; when present, selects PostgreSQL instead of SQLite                                                         |
 | `SHAR_POSTGRES_CA_FILE`         | Optional PEM CA certificate for the PostgreSQL server                                                                                 |
 | `SHAR_REDIS_URL`                | Optional Redis-compatible URL used for nonce and pressure state; requires `rediss://` outside insecure development                    |
+| `SHAR_REDIS_CA_FILE`            | Optional PEM CA certificate bundle for the Redis-compatible server; requires a `rediss://` URL                                        |
 | `SHAR_FALLBACK_SECRET`          | Optional independent 32-byte base64url bearer secret for privileged host fallback completion                                          |
 | `SHAR_FALLBACK_METHODS`         | Optional comma-separated advertised methods; requires the fallback secret and defaults to passkey/email/authenticated-session/support |
 | `SHAR_PRESENCE_MODE`            | Browser-visible presence plan: `none` (default) or host-owned `host`                                                                  |
@@ -329,7 +330,10 @@ When `SHAR_REDIS_URL` is set, Redis replaces only nonce consumption and
 pressure state; policy configuration remains in the selected SQLite or
 PostgreSQL store. Redis keys hash session and network inputs, share a cluster
 hash slot only within one tenant/site/action scope, and expire after two idle
-days by default. The production URL must use `rediss://`. Validate Lua `EVAL`,
+days by default. The production URL must use `rediss://`. Both servers verify
+the certificate and hostname, require TLS 1.2 or newer, and accept a private CA
+bundle through `SHAR_REDIS_CA_FILE`. Supplying that variable with a plaintext
+URL is a startup error. Validate Lua `EVAL`,
 `SET ... EXAT NX`, hashes, sorted sets, and cluster hash tags against the exact
 Redis-compatible service before enabling it.
 
@@ -388,6 +392,19 @@ exact bounded retryable errors, recovery to restore issuance, and both
 standalones to shut down cleanly. It validates Shar's client behavior under a
 complete local connection partition; it does not validate replication,
 election, DNS, TLS, or proxy behavior of a specific managed service.
+
+Before pointing a deployment at managed state, run the local verified-TLS gate:
+
+```sh
+npm run test:standalone-store-tls
+```
+
+It creates disposable pinned PostgreSQL and Redis containers plus an ephemeral
+private CA. The gate exercises both stores directly and both optimized
+standalones without insecure-development mode, then proves that wrong trust
+roots, hostname mismatches, and plaintext production URLs never become ready.
+It validates Shar's TLS clients and configuration contract; it does not replace
+failover and certificate-rotation trials against the exact managed service.
 
 Set `SHAR_TEST_POSTGRES_TLS=0` only for an isolated local PostgreSQL process
 that has no TLS support. The harness creates the `shar_*` schema, uses unique
