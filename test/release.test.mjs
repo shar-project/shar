@@ -32,3 +32,15 @@ test("published WASM builds remap host paths before byte comparison", async () =
   assert.match(script, /CARGO_ENCODED_RUSTFLAGS="\$encoded_rustflags"/);
   assert.match(script, /CARGO_TARGET_DIR="\$repo_root\/target"/);
 });
+
+test("external store interop enables assurance only behind loopback trust", async () => {
+  const script = await readFile(
+    new URL("../test/standalone-external-interop.sh", import.meta.url),
+    "utf8",
+  );
+  assert.equal(
+    script.match(/SHAR_TRUSTED_PROXY_CIDRS=127\.0\.0\.1\/32/g)?.length,
+    2,
+  );
+  assert.equal(script.match(/SHAR_ASSURANCE_MODE=trusted-header/g)?.length, 2);
+});

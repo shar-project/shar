@@ -116,13 +116,14 @@ jobs:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
       - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
-      - name: Build the exact platform as an OCI archive without publishing
+      - name: Build the exact platform as a Docker archive without publishing
         uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
         with:
           context: .
           file: ${{ matrix.dockerfile }}
           platforms: linux/${{ matrix.arch }}
-          outputs: type=oci,dest=${{ runner.temp }}/shar-release-security-${{ matrix.image }}-${{ matrix.arch }}.tar
+          outputs: type=docker,dest=${{ runner.temp }}/shar-release-security-${{ matrix.image }}-${{ matrix.arch }}.tar
+          provenance: false
           push: false
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -130,7 +131,7 @@ jobs:
         name: Report all vulnerabilities, including upstream-unfixed findings
         uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2 # v7.4.0
         with:
-          image: oci-archive:${{ runner.temp }}/shar-release-security-${{ matrix.image }}-${{ matrix.arch }}.tar
+          image: docker-archive:${{ runner.temp }}/shar-release-security-${{ matrix.image }}-${{ matrix.arch }}.tar
           fail-build: false
           only-fixed: false
           output-format: json
@@ -144,7 +145,7 @@ jobs:
       - name: Fail on actionable high or critical vulnerabilities
         uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2 # v7.4.0
         with:
-          image: oci-archive:${{ runner.temp }}/shar-release-security-${{ matrix.image }}-${{ matrix.arch }}.tar
+          image: docker-archive:${{ runner.temp }}/shar-release-security-${{ matrix.image }}-${{ matrix.arch }}.tar
           fail-build: true
           severity-cutoff: high
           only-fixed: true

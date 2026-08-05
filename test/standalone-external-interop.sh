@@ -48,6 +48,8 @@ start_servers() {
     SHAR_INSECURE_DEVELOPMENT=1 \
     SHAR_KEY_FILE="$test_directory/keys.json" \
     SHAR_ALLOWED_ORIGINS=http://localhost:3000 \
+    SHAR_TRUSTED_PROXY_CIDRS=127.0.0.1/32 \
+    SHAR_ASSURANCE_MODE=trusted-header \
     SHAR_POSTGRES_URL="$SHAR_TEST_POSTGRES_URL" \
     SHAR_REDIS_URL="$SHAR_TEST_REDIS_URL" \
     SHAR_LISTEN=127.0.0.1:4388 \
@@ -61,6 +63,8 @@ start_servers() {
     SHAR_INSECURE_DEVELOPMENT=1 \
     SHAR_KEY_FILE="$test_directory/keys.json" \
     SHAR_ALLOWED_ORIGINS=http://localhost:3000 \
+    SHAR_TRUSTED_PROXY_CIDRS=127.0.0.1/32 \
+    SHAR_ASSURANCE_MODE=trusted-header \
     SHAR_POSTGRES_URL="$SHAR_TEST_POSTGRES_URL" \
     SHAR_REDIS_URL="$SHAR_TEST_REDIS_URL" \
     SHAR_LISTEN=127.0.0.1:4389 \
