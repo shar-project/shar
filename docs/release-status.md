@@ -196,18 +196,20 @@ On x86_64 with Rust/Cargo 1.94.0 and Node 26.3.0:
   tarball installation and compiled-entry smoke tests pass, including the
   widget's exported WASM subpath and binary. Widget pause/resume, fallback,
   cleanup, and Cap hidden-token/event contracts pass in Chromium;
-- `@shar/widget` now includes an explicitly opt-in 68,831-byte Rust/WASM
+- `@shar/widget` now includes an explicitly opt-in 68,751-byte Rust/WASM
   sequential-squaring accelerator while preserving pure JavaScript `BigInt` as
   the universal/default path. Each call is bounded to 65,536 iterations and a
   512-byte integer, reuses the exact signed plan, checkpoints only at the same
   chunk boundary, and restores the pre-chunk value before JavaScript fallback.
   The artifact SHA-256 is
-  `bf27c58d78885cb6b80d38fae2a605c18b1130b25d3fcc62fdc5c55f5058e4ce`.
-  Local Rust 1.94.0 `wasm32-unknown-unknown` rebuilds are byte-identical; CI and
-  tagged-release preflight now rebuild and compare the committed binary before
-  packaging. Node tests cover ABI bounds, digest, output identity, and an
-  unavailable WebAssembly runtime. The default browser cold path and the
-  pure-TypeScript server remain WASM-free;
+  `abfe1fde6d133526abe811ecd19cdc251e7595f5910cdad46d21800b2f20cde8`.
+  Rust 1.94.0 `wasm32-unknown-unknown` rebuilds remap the repository and Cargo
+  registry to canonical paths before code generation, preventing dependency
+  panic locations from making the binary host-specific. CI and tagged-release
+  preflight rebuild and compare the committed binary before packaging. Node
+  tests cover ABI bounds, digest, output identity, and an unavailable
+  WebAssembly runtime. The default browser cold path and the pure-TypeScript
+  server remain WASM-free;
 - `@shar/widget` now exports separate reCAPTCHA- and hCaptcha-shaped browser
   adapters. Browser coverage proves rendered and invisible/v3-style execution,
   conventional response field names, callbacks, response/reset/removal state,

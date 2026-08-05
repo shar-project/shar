@@ -7,14 +7,26 @@ if [[ "$mode" != build && "$mode" != --check ]]; then
   exit 2
 fi
 
-repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 toolchain="${SHAR_WASM_RUST_TOOLCHAIN:-1.94.0}"
 rustc_path="$(rustup which --toolchain "$toolchain" rustc)"
 cargo_path="$(rustup which --toolchain "$toolchain" cargo)"
+if [[ -n "${CARGO_HOME:-}" ]]; then
+  cargo_home="$(cd "$CARGO_HOME" && pwd -P)"
+else
+  cargo_home="$(cd "${HOME:?HOME is required}/.cargo" && pwd -P)"
+fi
+encoded_rustflags="--remap-path-prefix=$repo_root=/src"
+encoded_rustflags+=$'\x1f'
+encoded_rustflags+="--remap-path-prefix=$cargo_home=/cargo"
 artifact="$repo_root/target/wasm32-unknown-unknown/release/shar_widget_wasm.wasm"
 published="$repo_root/packages/widget/wasm/shar_timelock.wasm"
 
-env RUSTC="$rustc_path" "$cargo_path" build \
+env \
+  RUSTC="$rustc_path" \
+  CARGO_TARGET_DIR="$repo_root/target" \
+  CARGO_ENCODED_RUSTFLAGS="$encoded_rustflags" \
+  "$cargo_path" build \
   --manifest-path "$repo_root/Cargo.toml" \
   --package shar-widget-wasm \
   --release \

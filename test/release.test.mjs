@@ -21,3 +21,14 @@ test("release metadata rejects non-stable or non-canonical tags", async () => {
       /release tag must be a stable SemVer tag/,
     );
 });
+
+test("published WASM builds remap host paths before byte comparison", async () => {
+  const script = await readFile(
+    new URL("../scripts/build-widget-wasm.sh", import.meta.url),
+    "utf8",
+  );
+  assert.match(script, /--remap-path-prefix=\$repo_root=\/src/);
+  assert.match(script, /--remap-path-prefix=\$cargo_home=\/cargo/);
+  assert.match(script, /CARGO_ENCODED_RUSTFLAGS="\$encoded_rustflags"/);
+  assert.match(script, /CARGO_TARGET_DIR="\$repo_root\/target"/);
+});

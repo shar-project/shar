@@ -143,7 +143,7 @@ An opt-in strict CSP must allow the asset through `connect-src` and WASM
 compilation through `script-src 'wasm-unsafe-eval'`. Hosts that omit that token
 continue through JavaScript. The default cold path does not fetch the optional
 68 KiB artifact. Its SHA-256 is
-`bf27c58d78885cb6b80d38fae2a605c18b1130b25d3fcc62fdc5c55f5058e4ce`.
+`abfe1fde6d133526abe811ecd19cdc251e7595f5910cdad46d21800b2f20cde8`.
 Rebuild or verify the committed artifact with pinned Rust 1.94.0 and the
 `wasm32-unknown-unknown` target:
 

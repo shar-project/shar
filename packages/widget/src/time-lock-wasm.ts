@@ -1,7 +1,7 @@
 import { bigintToBytes, bytesToBigint } from "@shar/server/browser";
 
 export const SHAR_TIMELOCK_WASM_SHA256 =
-  "bf27c58d78885cb6b80d38fae2a605c18b1130b25d3fcc62fdc5c55f5058e4ce";
+  "abfe1fde6d133526abe811ecd19cdc251e7595f5910cdad46d21800b2f20cde8";
 
 export type TimeLockWasmOption = boolean | string | URL;
 
