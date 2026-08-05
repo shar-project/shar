@@ -541,7 +541,7 @@ On x86_64 with Rust/Cargo 1.94.0 and Node 26.3.0:
   workflow's pinned engine found no high/critical vulnerability with an
   available fix in either amd64 image. Complete upstream-unfixed findings
   remain visible rather than being described as clean. The workflow now builds
-  both amd64 and arm64 inputs as explicit OCI archives and scans all four
+  both amd64 and arm64 inputs as explicit Docker archives and scans all four
   image/platform pairs before the publication job receives credentials. A
   registry-backed contract checks that every digest is an OCI index with both
   required Linux architectures. This caught and replaced three initially
