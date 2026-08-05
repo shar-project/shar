@@ -1,0 +1,7 @@
+# Reviewed deterministic protocol fixtures from the repository's initial
+# full-history scan. Fingerprints bind the original commit, path, rule, and
+# line; a copied or newly introduced value is not ignored.
+444043f72638cd93b80c0ad44a9a358e6c607fec:protocol/trust-voprf-vectors.json:generic-api-key:7
+444043f72638cd93b80c0ad44a9a358e6c607fec:test/browser/render.spec.mjs:generic-api-key:405
+444043f72638cd93b80c0ad44a9a358e6c607fec:test/browser/render.spec.mjs:generic-api-key:839
+444043f72638cd93b80c0ad44a9a358e6c607fec:test/browser/render.spec.mjs:generic-api-key:913

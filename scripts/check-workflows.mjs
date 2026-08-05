@@ -166,10 +166,11 @@ function requireContainerGate(name, text) {
   }
 }
 
-const [ci, release, dependabot] = await Promise.all([
+const [ci, release, dependabot, secretScan] = await Promise.all([
   workflow("ci"),
   workflow("release"),
   readFile(new URL("../.github/dependabot.yml", import.meta.url), "utf8"),
+  readFile(new URL("check-secrets.sh", import.meta.url), "utf8"),
 ]);
 await format(dependabot, { parser: "yaml" });
 requirePinnedActions("CI", ci);
@@ -192,6 +193,22 @@ const packages = job(ci, "packages");
 const releasePreflight = job(release, "preflight");
 assert.match(packages, /npm run check:docs/);
 assert.match(releasePreflight, /npm run check:docs/);
+for (const source of [packages, releasePreflight]) {
+  assert.match(source, /fetch-depth: 0/);
+  assert.match(source, /npm run check:secrets/);
+}
+assert.match(secretScan, /version=8\.30\.1/);
+assert.match(
+  secretScan,
+  /archive_sha256=551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb/,
+);
+assert.match(
+  secretScan,
+  /archive_sha256=e4a487ee7ccd7d3a7f7ec08657610aa3606637dab924210b3aee62570fb4b080/,
+);
+assert.match(secretScan, /--log-opts=--all/);
+assert.match(secretScan, /--redact=100/);
+assert.match(secretScan, /Gitleaks fail-closed self-test/);
 for (const source of [packages, releasePreflight]) {
   assert.match(
     source,

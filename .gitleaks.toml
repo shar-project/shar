@@ -1,0 +1,4 @@
+title = "Shar secret scanning"
+
+[extend]
+useDefault = true
