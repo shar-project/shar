@@ -1,0 +1,66 @@
+{
+  "version": "render-v1-vectors-1",
+  "transcript_word_order": [
+    "chain_width",
+    "layout_height",
+    "grid_first_width",
+    "grid_second_width",
+    "flex_first_width",
+    "flex_second_width",
+    "intrinsic_width",
+    "query_branch",
+    "style_branch",
+    "nested_branch",
+    "transform_x",
+    "transform_y",
+    "vertical_writing",
+    "hit_id",
+    "topology_depth"
+  ],
+  "cases": [
+    {
+      "name": "zero",
+      "seed": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "rounds": 2,
+      "triangles": 8,
+      "samples": 16,
+      "transcript_words": [64, 48, 16, 48, 4, 12, 8, 12, 12, 1, 4, 4, 0, 1, 3],
+      "digest": "XBnikgSO8AzOfMrpg1EDZH46vjjovkkGRA9MmiQv7_A",
+      "css_commitment": "amIKy6SKVrc5Vi4HgSJBTCZCpLF_B6Z9ahgvpTRVDoA"
+    },
+    {
+      "name": "low",
+      "seed": "AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE",
+      "rounds": 1,
+      "triangles": 8,
+      "samples": 31,
+      "transcript_words": [65, 49, 17, 48, 5, 12, 9, 13, 13, 1, 5, 5, 1, 2, 4],
+      "digest": "CImkXa1By9NHiI64oET_B5EE2W6GCDgNoETyuX6XKC8",
+      "css_commitment": "CphKz8Oh9WUzwGACZ53wQP3pVy1G1cdoJfpQ3_1i2JQ"
+    },
+    {
+      "name": "middle",
+      "seed": "f39_f39_f39_f39_f39_f39_f39_f39_f39_f39_f38",
+      "rounds": 1,
+      "triangles": 17,
+      "samples": 63,
+      "transcript_words": [
+        127, 79, 47, 80, 14, 33, 15, 43, 43, 1, 11, 11, 1, 2, 4
+      ],
+      "digest": "s_Xougm83hDzirNDdEtpW7eTdSCjGs5KFqDCfZKn_nY",
+      "css_commitment": "O1hM2pjf6cnzZgyvXQVEFG3xb_37DTAccv6ZMTFAhGI"
+    },
+    {
+      "name": "high",
+      "seed": "__________________________________________8",
+      "rounds": 1,
+      "triangles": 32,
+      "samples": 96,
+      "transcript_words": [
+        127, 63, 47, 80, 25, 22, 23, 43, 43, 1, 19, 19, 1, 2, 6
+      ],
+      "digest": "YxFgvd_xlHKqFoC37W6QuRYo10Y33Pl-UxKBrS3zks4",
+      "css_commitment": "1y1aui1K0jyJpX8Np58fzkQonlVdLvU4rve-11vdbOs"
+    }
+  ]
+}

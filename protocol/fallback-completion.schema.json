@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shar.dev/schema/v1/fallback-completion.json",
+  "title": "Shar privileged fallback completion v1",
+  "oneOf": [{ "$ref": "#/$defs/request" }, { "$ref": "#/$defs/response" }],
+  "$defs": {
+    "request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tenant",
+        "site_key",
+        "action",
+        "origin",
+        "method",
+        "assertion_id"
+      ],
+      "properties": {
+        "tenant": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "x-shar-maxUtf8Bytes": 128,
+          "x-shar-noControlCharacters": true
+        },
+        "site_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-shar-maxUtf8Bytes": 256,
+          "x-shar-noControlCharacters": true
+        },
+        "action": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "x-shar-maxUtf8Bytes": 128,
+          "x-shar-noControlCharacters": true
+        },
+        "origin": {
+          "type": "string",
+          "format": "uri",
+          "maxLength": 512,
+          "x-shar-maxUtf8Bytes": 512,
+          "x-shar-noControlCharacters": true
+        },
+        "region": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "x-shar-maxUtf8Bytes": 64,
+          "x-shar-noControlCharacters": true
+        },
+        "method": { "type": "string", "pattern": "^[A-Za-z0-9._-]{1,64}$" },
+        "assertion_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-shar-minUtf8Bytes": 16,
+          "x-shar-maxUtf8Bytes": 256
+        },
+        "session_binding": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-shar-maxUtf8Bytes": 256,
+          "x-shar-noControlCharacters": true
+        }
+      }
+    },
+    "response": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "success",
+        "tenant",
+        "site_key",
+        "action",
+        "origin",
+        "verification_method",
+        "method"
+      ],
+      "properties": {
+        "success": { "const": true },
+        "tenant": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "x-shar-maxUtf8Bytes": 128,
+          "x-shar-noControlCharacters": true
+        },
+        "site_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-shar-maxUtf8Bytes": 256,
+          "x-shar-noControlCharacters": true
+        },
+        "action": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "x-shar-maxUtf8Bytes": 128,
+          "x-shar-noControlCharacters": true
+        },
+        "origin": {
+          "type": "string",
+          "format": "uri",
+          "maxLength": 512,
+          "x-shar-maxUtf8Bytes": 512,
+          "x-shar-noControlCharacters": true
+        },
+        "region": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "x-shar-maxUtf8Bytes": 64,
+          "x-shar-noControlCharacters": true
+        },
+        "verification_method": { "const": "fallback" },
+        "method": { "type": "string", "pattern": "^[A-Za-z0-9._-]{1,64}$" }
+      }
+    }
+  }
+}

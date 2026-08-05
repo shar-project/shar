@@ -1,0 +1,270 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  typescript:
+    name: TypeScript / Node ${{ matrix.node }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: ${{ matrix.node }}
+          package-manager-cache: false
+      - run: npm ci --ignore-scripts
+      - run: npm test
+      - run: npm audit --audit-level=high
+
+  browser:
+    name: ${{ matrix.browser }} rendering and widget
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - run: npm ci --ignore-scripts
+      - run: npx playwright install --with-deps ${{ matrix.browser }}
+      - run: npm run test:browser -- --project=${{ matrix.browser }}
+
+  javascript-runtimes:
+    name: Pure TypeScript / Node, Bun, Deno
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: 1.3.14
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
+        with:
+          deno-version: v2.9.0
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+      - run: node test/runtime-smoke.mjs
+      - run: bun test/runtime-smoke.mjs
+      - run: deno run --no-prompt test/runtime-smoke.mjs
+
+  rust:
+    name: Rust
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      checks: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - run: rustup toolchain install 1.94.0 --profile minimal --component rustfmt --component clippy --target wasm32-unknown-unknown
+      - run: rustup default 1.94.0
+      - run: scripts/build-widget-wasm.sh --check
+      - run: cargo fmt --all -- --check
+      - run: cargo clippy --workspace --locked --all-targets -- -D warnings
+      - run: cargo test --workspace --locked
+      - name: Redis dropped-connection recovery
+        run: cargo test --locked -p shar-server redis::tests::failed_connection_is_not_retried_and_the_next_request_reconnects -- --ignored --exact
+      - name: Native container healthcheck
+        run: cargo test --locked -p shar-server --bin shar-server http_tests::container_healthcheck_accepts_a_ready_http_endpoint -- --ignored --exact
+      - name: Audit Rust dependencies against RustSec
+        uses: rustsec/audit-check@69366f33c96575abad1ee0dba8212993eecbe998 # v2.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  standalone-interop:
+    name: Rust / JavaScript standalone interoperability
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - run: rustup toolchain install 1.94.0 --profile minimal
+      - run: rustup default 1.94.0
+      - run: npm ci --ignore-scripts
+      - run: npm run test:standalone-interop
+
+  durable-store-interop:
+    name: PostgreSQL / Redis cross-process interoperability
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres@sha256:7a396fd264a2067788b6551122b50f162bf6136312c7fc9d74381cb92c648382
+        env:
+          POSTGRES_DB: shar
+          POSTGRES_USER: shar
+          POSTGRES_PASSWORD: shar-test-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U shar -d shar"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 20
+      redis:
+        image: redis@sha256:9702d01c1f10c3ea9f48211b4362e44f154ff02d063e6f7268eba804059f53bf
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      SHAR_TEST_POSTGRES_URL: postgresql://shar:shar-test-only@127.0.0.1:5432/shar?sslmode=disable
+      SHAR_TEST_POSTGRES_TLS: "0"
+      SHAR_TEST_REDIS_URL: redis://127.0.0.1:6379
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - run: rustup toolchain install 1.94.0 --profile minimal
+      - run: rustup default 1.94.0
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+      - run: npm run test:stores:live
+      - name: PostgreSQL terminated-connection recovery
+        run: cargo test --locked -p shar-server postgres::tests::terminated_client_is_not_retried_and_the_next_request_reconnects -- --ignored --exact
+      - run: npm run test:standalone-external-interop
+
+  cap-behavior:
+    name: Pinned Cap behavior matrix
+    runs-on: ubuntu-24.04
+    services:
+      redis:
+        image: redis@sha256:9702d01c1f10c3ea9f48211b4362e44f154ff02d063e6f7268eba804059f53bf
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: 1.3.14
+      - run: npm ci --ignore-scripts
+      - run: npm run bench:cap:prepare
+      - run: bun install --frozen-lockfile
+        working-directory: .bench/cap/source/standalone/standalone
+      - run: npm run bench:cap:behavior
+        env:
+          CAP_BENCH_REDIS_URL: redis://127.0.0.1:6379
+          CAP_BENCH_BEHAVIOR_OUTPUT: /tmp/shar-cap-behavior.json
+
+  container-security:
+    name: ${{ matrix.image }} ${{ matrix.arch }} container vulnerability gate
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: rust
+            dockerfile: deploy/docker/Dockerfile.rust
+            arch: amd64
+          - image: rust
+            dockerfile: deploy/docker/Dockerfile.rust
+            arch: arm64
+          - image: javascript
+            dockerfile: deploy/docker/Dockerfile.javascript
+            arch: amd64
+          - image: javascript
+            dockerfile: deploy/docker/Dockerfile.javascript
+            arch: arm64
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - name: Build the exact platform as an OCI archive without publishing
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          platforms: linux/${{ matrix.arch }}
+          outputs: type=oci,dest=${{ runner.temp }}/shar-security-${{ matrix.image }}-${{ matrix.arch }}.tar
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - id: complete-vulnerability-report
+        name: Report all vulnerabilities, including upstream-unfixed findings
+        uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2 # v7.4.0
+        with:
+          image: oci-archive:${{ runner.temp }}/shar-security-${{ matrix.image }}-${{ matrix.arch }}.tar
+          fail-build: false
+          only-fixed: false
+          output-format: json
+      - name: Retain the complete vulnerability report
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        with:
+          name: container-vulnerabilities-${{ matrix.image }}-${{ matrix.arch }}
+          path: ${{ steps.complete-vulnerability-report.outputs.json }}
+          if-no-files-found: error
+          retention-days: 14
+      - name: Fail on actionable high or critical vulnerabilities
+        uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2 # v7.4.0
+        with:
+          image: oci-archive:${{ runner.temp }}/shar-security-${{ matrix.image }}-${{ matrix.arch }}.tar
+          fail-build: true
+          severity-cutoff: high
+          only-fixed: true
+          output-format: table
+
+  packages:
+    name: Package and workflow contents
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - run: npm ci --ignore-scripts
+      - run: npm run format:check
+      - run: npm run check:deployments
+      - run: npm run check:base-images
+      - run: npm run check:workflows
+      - name: Validate the production observation collector
+        run: docker run --rm --user 10001:10001 -v "$PWD/deploy/observability:/etc/shar-observability:ro" docker.io/grafana/alloy:v1.14.0@sha256:f50931848bd8178774521767bb46b905e1a081301950ff28d7623c9db7c01076 validate /etc/shar-observability/alloy-config.alloy
+      - run: npm pack --workspaces --dry-run
+      - name: Validate workflows with checksum-pinned actionlint
+        env:
+          ACTIONLINT_VERSION: 1.7.12
+          ACTIONLINT_SHA256: 8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8
+        run: |
+          archive="$RUNNER_TEMP/actionlint.tar.gz"
+          curl --fail --show-error --silent --location \
+            "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz" \
+            --output "$archive"
+          echo "$ACTIONLINT_SHA256  $archive" | sha256sum --check --strict
+          tar --extract --gzip --file "$archive" --directory "$RUNNER_TEMP" actionlint
+          "$RUNNER_TEMP/actionlint" .github/workflows/*.yml

@@ -1,0 +1,190 @@
+{
+  "schema": "shar-cap-live-reference-v1",
+  "environment": {
+    "captured_at": "2026-08-04T11:47:49.003Z",
+    "node": "v26.3.0",
+    "v8": "14.6.202.34-node.20",
+    "os": "linux 7.1.4-gentoo-dist-hardened",
+    "arch": "x64",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-1255U",
+    "logical_cpus": 12,
+    "load_average": [1.96, 4.15, 6.3],
+    "host": "#1 SMP PREEMPT_DYNAMIC Tue Jul 21 07:06:44 AEST 2026"
+  },
+  "inputs": {
+    "shar_endpoint": "http://127.0.0.1:4211",
+    "cap_endpoint_origin": "http://127.0.0.1:4210",
+    "cap": {
+      "schema": "shar-cap-inputs-v1",
+      "standalone": {
+        "tag": "standalone@3.1.8",
+        "commit": "1d4f246d29b691275ce0edbbc8290198ebf8bde8",
+        "repository": "https://github.com/tiagozip/cap.git",
+        "corePackage": "capjs-core@0.1.1"
+      },
+      "widget": {
+        "tag": "widget@0.1.56",
+        "commit": "7849efa7f9ee19694c6f5ba73d0e7f82d37d086f",
+        "package": "cap-widget@0.1.56",
+        "integrity": "sha512-mAoFWzouxCjvi0B0Y0s7cRGGaLvJxifMVeNIHiFCkZme/9BOASWliN0aqz9wTUdlrt3Awm0UEA8h8DV1IDUuug=="
+      },
+      "wasm": {
+        "package": "@cap.js/wasm@0.0.7",
+        "integrity": "sha512-IgUjrPOUBaOjTp+BkrhfEBBeQ4An7fQiSWWezDy9Uvd+OdTYm4+h3AJU0j/CpHYayp7FltZU+UePC6p28oGQaw==",
+        "browserPath": "browser/cap_wasm_bg.wasm"
+      }
+    },
+    "cap_declared_settings": {
+      "challengeCount": 80,
+      "saltSize": 32,
+      "difficulty": 4,
+      "instrumentation": false,
+      "rsw": true,
+      "rswT": 75000
+    },
+    "origin": "http://localhost:3000",
+    "samples": 1,
+    "issue_operations": 3000,
+    "concurrency": 32,
+    "http_client_workers": 8,
+    "http_client": "recorded Node worker pool with fixed total concurrency and per-worker HTTP/1.1 keep-alive agents; latency is request start through response headers",
+    "shar_action_cardinality": 1,
+    "rss_interval_ms": 50
+  },
+  "warnings": [
+    "Node CPU reference solve times are not accelerated-browser or energy evidence.",
+    "Live endpoint throughput includes loopback/network and configured storage latency.",
+    "Shar issuance uses 1 action scope(s); set SHAR_BENCH_ACTION_CARDINALITY=3000 for the high-cardinality abuse profile.",
+    "RSS samples use Linux /proc VmRSS and are reference-process evidence, not a stabilized container memory limit or a multi-host benchmark."
+  ],
+  "behavior": {
+    "shar_origin_request": {
+      "status": 200,
+      "body_shape": ["quote", "render", "time_lock", "token", "trust"]
+    },
+    "cap_raw_request": {
+      "status": 200,
+      "body_shape": ["challenges", "expires", "format", "token"]
+    },
+    "cap_browser_like_request": {
+      "status": 200,
+      "body_shape": ["challenges", "expires", "format", "token"]
+    }
+  },
+  "idle_memory": { "shar_rss_bytes": 11034624, "cap_rss_bytes": 157208576 },
+  "issuance": {
+    "shar": {
+      "operations": 3000,
+      "concurrency": 32,
+      "elapsed_ms": 432.28333599999996,
+      "operations_per_second": 6939.8927744001685,
+      "latency": {
+        "samples": 3000,
+        "min_ms": 0.654021000000057,
+        "median_ms": 3.7768029999999726,
+        "p95_ms": 7.428787,
+        "max_ms": 21.86703,
+        "mean_ms": 4.133996206666671
+      },
+      "response_body_bytes": {
+        "samples": 3000,
+        "min": 1824,
+        "median": 1855,
+        "p95": 1857,
+        "max": 1857,
+        "mean": 1854.3633333333332
+      },
+      "rss": {
+        "sample_count": 10,
+        "baseline_rss_bytes": 11063296,
+        "peak_rss_bytes": 16982016,
+        "final_rss_bytes": 16982016
+      },
+      "server_observed": {
+        "issued": 3000,
+        "engine_seconds": 8.343755999999999,
+        "handler_seconds": 8.433404999999999,
+        "mean_engine_ms": 2.781252,
+        "mean_handler_ms": 2.8111349999999997
+      }
+    },
+    "cap": {
+      "operations": 3000,
+      "concurrency": 32,
+      "elapsed_ms": 4127.521221,
+      "operations_per_second": 726.8284860018651,
+      "latency": {
+        "samples": 3000,
+        "min_ms": 13.706282000000101,
+        "median_ms": 42.03002500000002,
+        "p95_ms": 53.714844000000085,
+        "max_ms": 67.18856799999992,
+        "mean_ms": 43.39447053800002
+      },
+      "response_body_bytes": {
+        "samples": 3000,
+        "min": 2404,
+        "median": 2404,
+        "p95": 2404,
+        "max": 2404,
+        "mean": 2404
+      },
+      "rss": {
+        "sample_count": 84,
+        "baseline_rss_bytes": 157319168,
+        "peak_rss_bytes": 168386560,
+        "final_rss_bytes": 133361664
+      }
+    }
+  },
+  "cpu_reference_solve": {
+    "shar": {
+      "samples": 1,
+      "min_ms": 38.02367299999969,
+      "median_ms": 38.02367299999969,
+      "p95_ms": 38.02367299999969,
+      "max_ms": 38.02367299999969,
+      "mean_ms": 38.02367299999969
+    },
+    "cap": {
+      "samples": 1,
+      "min_ms": 341.50567200000023,
+      "median_ms": 341.50567200000023,
+      "p95_ms": 341.50567200000023,
+      "max_ms": 341.50567200000023,
+      "mean_ms": 341.50567200000023
+    }
+  },
+  "redemption": {
+    "shar": {
+      "samples": 1,
+      "min_ms": 20.81260099999963,
+      "median_ms": 20.81260099999963,
+      "p95_ms": 20.81260099999963,
+      "max_ms": 20.81260099999963,
+      "mean_ms": 20.81260099999963
+    },
+    "cap": {
+      "samples": 1,
+      "min_ms": 7.3845820000005915,
+      "median_ms": 7.3845820000005915,
+      "p95_ms": 7.3845820000005915,
+      "max_ms": 7.3845820000005915,
+      "mean_ms": 7.3845820000005915
+    }
+  },
+  "ga_gates": {
+    "accelerated_p95_and_energy": {
+      "status": "not_measured",
+      "reason": "requires reference-device browser and energy instrumentation"
+    },
+    "attacker_cost_ratio": {
+      "status": "not_measured",
+      "reason": "requires calibrated attacker hardware cost inputs"
+    },
+    "server_throughput_and_memory": {
+      "status": "reference_only",
+      "reason": "production gate requires isolated containers, sustained load, matching stores, idle-memory stabilization, and the full native/JavaScript deployment matrix"
+    }
+  }
+}

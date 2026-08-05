@@ -1,0 +1,33 @@
+# syntax=docker/dockerfile:1.7
+FROM rust:1.94-trixie@sha256:652612f07bfbbdfa3af34761c1e435094c00dde4a98036132fca28c7bb2b165c AS build
+WORKDIR /src
+COPY Cargo.toml Cargo.lock ./
+COPY crates ./crates
+RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \
+    --mount=type=cache,target=/src/target,sharing=locked \
+    cargo build --locked --release --bin shar-server --bin shar-keygen && \
+    mkdir /out && \
+    cp target/release/shar-server target/release/shar-keygen /out/
+
+FROM node:24-trixie-slim@sha256:85498d7fd8e2bc0b02abb1792ef27341559836236dd0b1af160fa66bb85148df AS admin
+WORKDIR /src
+COPY package.json package-lock.json tsconfig.json ./
+COPY packages ./packages
+RUN --mount=type=cache,target=/root/.npm,sharing=locked npm ci --ignore-scripts
+COPY admin ./admin
+RUN npm run build:admin
+
+FROM debian:trixie-slim@sha256:020c0d20b9880058cbe785a9db107156c3c75c2ac944a6aa7ab59f2add76a7bd
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+RUN groupadd --system --gid 10001 shar && useradd --system --uid 10001 --gid shar --home-dir /nonexistent --shell /usr/sbin/nologin shar
+COPY --from=build /out/shar-server /usr/local/bin/shar-server
+COPY --from=build /out/shar-keygen /usr/local/bin/shar-keygen
+COPY --from=admin /src/dist/admin /usr/share/shar/admin
+RUN mkdir /data && chown shar:shar /data
+USER 10001:10001
+WORKDIR /data
+ENV SHAR_LISTEN=0.0.0.0:8080 SHAR_DATABASE=/data/shar.sqlite SHAR_ADMIN_ASSETS=/usr/share/shar/admin
+EXPOSE 8080
+VOLUME ["/data"]
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 CMD ["/usr/local/bin/shar-server", "--healthcheck"]
+ENTRYPOINT ["/usr/local/bin/shar-server"]

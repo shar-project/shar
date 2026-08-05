@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shar.dev/schema/v1/work-quote.json",
+  "title": "WorkQuote",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "tier",
+    "time_lock_iterations",
+    "render_rounds",
+    "issued_at",
+    "expires_at"
+  ],
+  "properties": {
+    "version": { "const": "work-price-v1" },
+    "tier": { "type": "integer", "minimum": 0, "maximum": 32 },
+    "time_lock_iterations": { "type": "string", "pattern": "^[1-9][0-9]*$" },
+    "render_rounds": { "type": "integer", "minimum": 1, "maximum": 65536 },
+    "issued_at": { "type": "integer", "minimum": 0 },
+    "expires_at": { "type": "integer", "minimum": 0 }
+  }
+}

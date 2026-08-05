@@ -1,0 +1,112 @@
+{
+  "schema": "shar-cap-artifact-bytes-v1",
+  "environment": {
+    "captured_at": "2026-08-05T05:10:15.302Z",
+    "node": "v26.3.0",
+    "v8": "14.6.202.34-node.20",
+    "os": "linux 7.1.4-gentoo-dist-hardened",
+    "arch": "x64",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-1255U",
+    "logical_cpus": 12,
+    "load_average": [9.36, 7.17, 6.78],
+    "host": "#1 SMP PREEMPT_DYNAMIC Tue Jul 21 07:06:44 AEST 2026"
+  },
+  "inputs": {
+    "shar_version": "0.1.0",
+    "cap_widget": {
+      "tag": "widget@0.1.56",
+      "commit": "7849efa7f9ee19694c6f5ba73d0e7f82d37d086f",
+      "package": "cap-widget@0.1.56",
+      "integrity": "sha512-mAoFWzouxCjvi0B0Y0s7cRGGaLvJxifMVeNIHiFCkZme/9BOASWliN0aqz9wTUdlrt3Awm0UEA8h8DV1IDUuug=="
+    },
+    "cap_wasm": {
+      "package": "@cap.js/wasm@0.0.7",
+      "integrity": "sha512-IgUjrPOUBaOjTp+BkrhfEBBeQ4An7fQiSWWezDy9Uvd+OdTYm4+h3AJU0j/CpHYayp7FltZU+UePC6p28oGQaw==",
+      "browserPath": "browser/cap_wasm_bg.wasm"
+    }
+  },
+  "method": {
+    "shar": "Minified Rolldown production ESM bundle of @shar/widget; totals include every statically imported chunk and report optional dynamic chunks separately",
+    "cap": "Published cap-widget cap.min.js plus eagerly fetched @cap.js/wasm browser binary",
+    "compression": "gzip level 9 and Brotli quality 11, cold cache, response bodies only",
+    "exclusions": [
+      "HTTP headers",
+      "challenge and redemption payloads",
+      "optional dynamically loaded trust-credit cryptography",
+      "optional locale entry points selected by the host application",
+      "instrumentation fallback pako download"
+    ]
+  },
+  "shar": {
+    "javascript": {
+      "resources": [
+        {
+          "name": "bytes-DXTL6aNa.js",
+          "raw": 1148,
+          "gzip": 621,
+          "brotli": 569,
+          "sha256": "c1453eab3562b9950b6388f71bbc261ed83960ab1d9d45e498be0c61d131fc24"
+        },
+        {
+          "name": "shar.js",
+          "raw": 53807,
+          "gzip": 16780,
+          "brotli": 15154,
+          "sha256": "ffc6176427f2045926f1063e534b88b4efcb9ad59bbe7230ab7a8ee9e1587882"
+        }
+      ],
+      "raw": 54955,
+      "gzip": 17401,
+      "brotli": 15723,
+      "sha256": "1294c0bb0a60cfcba261913259f98c594fddd6150c9e24b797683979b09097f3"
+    },
+    "optional_lazy_javascript": {
+      "resources": [
+        {
+          "name": "trust-credits-BZyuCc_d.js",
+          "raw": 48581,
+          "gzip": 18402,
+          "brotli": 16262,
+          "sha256": "98f000806ce32e7dd90b083ea2cf2707ba96ca59ff40037f6cfc696a962331cb"
+        }
+      ],
+      "raw": 48581,
+      "gzip": 18402,
+      "brotli": 16262,
+      "sha256": "fc9e73e371bbfa50fed3288f1897e4cb91288f35591663db1369c2e6f874531a"
+    },
+    "raw_total": 54955,
+    "gzip_total": 17401,
+    "brotli_total": 15723
+  },
+  "cap": {
+    "javascript": {
+      "raw": 43729,
+      "gzip": 14828,
+      "brotli": 12830,
+      "sha256": "296eb54ccfa39ba072fa68e81cb1013cb4d68cde2cfe22da0501543b2e7a2f9e"
+    },
+    "wasm": {
+      "raw": 22608,
+      "gzip": 8723,
+      "brotli": 7117,
+      "sha256": "e4f3c00246a775193661f9277ca1288cd310a6514de166ecc2176ccd26fb06a9"
+    },
+    "raw_total": 66337,
+    "gzip_total": 23551,
+    "brotli_total": 19947
+  },
+  "shar_over_cap": {
+    "raw": 0.8284215445377391,
+    "gzip": 0.7388645917370812,
+    "brotli": 0.7882388329072041
+  },
+  "gate": {
+    "requirement": "Shar default cold-path bytes <= 80% of Cap equivalent path",
+    "encoding": "brotli",
+    "threshold": 0.8,
+    "observed": 0.7882388329072041,
+    "pass": true,
+    "scope": "artifact-only; browser network capture remains required for GA"
+  }
+}

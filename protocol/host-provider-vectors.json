@@ -1,0 +1,79 @@
+{
+  "schema": "shar-host-provider-vectors-v1",
+  "signals": [
+    {
+      "name": "provider_sets_assurance",
+      "request_assurance_tier": null,
+      "provider": { "outcome": "tier", "tier": 7 },
+      "result": { "outcome": "quote", "tier": 7 }
+    },
+    {
+      "name": "provider_cannot_lower_existing_assurance",
+      "request_assurance_tier": 12,
+      "provider": { "outcome": "tier", "tier": 7 },
+      "result": { "outcome": "quote", "tier": 12 }
+    },
+    {
+      "name": "provider_raises_existing_assurance",
+      "request_assurance_tier": 7,
+      "provider": { "outcome": "tier", "tier": 12 },
+      "result": { "outcome": "quote", "tier": 12 }
+    },
+    {
+      "name": "provider_out_of_range",
+      "request_assurance_tier": null,
+      "provider": { "outcome": "tier", "tier": 33 },
+      "result": {
+        "outcome": "error",
+        "code": "pricing_unavailable",
+        "retryable": true,
+        "next_action": "retry",
+        "retry_after": 1,
+        "pricing_mutations": 0
+      }
+    },
+    {
+      "name": "provider_unavailable",
+      "request_assurance_tier": null,
+      "provider": { "outcome": "unavailable" },
+      "result": {
+        "outcome": "error",
+        "code": "pricing_unavailable",
+        "retryable": true,
+        "next_action": "retry",
+        "retry_after": 1,
+        "pricing_mutations": 0
+      }
+    }
+  ],
+  "fallback": [
+    {
+      "name": "assertion_accepted",
+      "provider": { "outcome": "accepted" },
+      "result": { "outcome": "success", "consumes_nonce": true }
+    },
+    {
+      "name": "assertion_rejected",
+      "provider": { "outcome": "rejected" },
+      "result": {
+        "outcome": "error",
+        "code": "fallback_not_verified",
+        "retryable": false,
+        "next_action": "fallback",
+        "consumes_nonce": false
+      }
+    },
+    {
+      "name": "verifier_unavailable",
+      "provider": { "outcome": "unavailable" },
+      "result": {
+        "outcome": "error",
+        "code": "fallback_unavailable",
+        "retryable": true,
+        "next_action": "retry",
+        "retry_after": 1,
+        "consumes_nonce": false
+      }
+    }
+  ]
+}

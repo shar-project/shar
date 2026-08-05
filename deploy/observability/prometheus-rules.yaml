@@ -1,0 +1,26 @@
+groups:
+  - name: shar
+    rules:
+      - alert: SharTargetDown
+        expr: 'up{job=~"shar.*"} == 0'
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: Shar target is unavailable
+          description: The Shar metrics target has been unreachable for two minutes.
+      - alert: SharAuditEventsDropped
+        expr: "increase(shar_audit_events_dropped_total[5m]) > 0"
+        labels:
+          severity: warning
+        annotations:
+          summary: Shar dropped privacy-filtered audit events
+          description: Audit loss is operational only and must never reject completed proof work.
+      - alert: SharChallengeHandlerMeanHigh
+        expr: "rate(shar_challenge_handler_duration_seconds_total[5m]) / clamp_min(rate(shar_challenges_issued_total[5m]), 0.001) > 0.5 and rate(shar_challenges_issued_total[5m]) > 0"
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: Shar mean challenge handler time exceeds 500 ms
+          description: Investigate state latency, blocking-worker pressure, and admission limits.

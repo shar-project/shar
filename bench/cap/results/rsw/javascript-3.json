@@ -1,0 +1,190 @@
+{
+  "schema": "shar-cap-live-reference-v1",
+  "environment": {
+    "captured_at": "2026-08-04T11:48:08.648Z",
+    "node": "v26.3.0",
+    "v8": "14.6.202.34-node.20",
+    "os": "linux 7.1.4-gentoo-dist-hardened",
+    "arch": "x64",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-1255U",
+    "logical_cpus": 12,
+    "load_average": [2.79, 4.19, 6.27],
+    "host": "#1 SMP PREEMPT_DYNAMIC Tue Jul 21 07:06:44 AEST 2026"
+  },
+  "inputs": {
+    "shar_endpoint": "http://127.0.0.1:4211",
+    "cap_endpoint_origin": "http://127.0.0.1:4210",
+    "cap": {
+      "schema": "shar-cap-inputs-v1",
+      "standalone": {
+        "tag": "standalone@3.1.8",
+        "commit": "1d4f246d29b691275ce0edbbc8290198ebf8bde8",
+        "repository": "https://github.com/tiagozip/cap.git",
+        "corePackage": "capjs-core@0.1.1"
+      },
+      "widget": {
+        "tag": "widget@0.1.56",
+        "commit": "7849efa7f9ee19694c6f5ba73d0e7f82d37d086f",
+        "package": "cap-widget@0.1.56",
+        "integrity": "sha512-mAoFWzouxCjvi0B0Y0s7cRGGaLvJxifMVeNIHiFCkZme/9BOASWliN0aqz9wTUdlrt3Awm0UEA8h8DV1IDUuug=="
+      },
+      "wasm": {
+        "package": "@cap.js/wasm@0.0.7",
+        "integrity": "sha512-IgUjrPOUBaOjTp+BkrhfEBBeQ4An7fQiSWWezDy9Uvd+OdTYm4+h3AJU0j/CpHYayp7FltZU+UePC6p28oGQaw==",
+        "browserPath": "browser/cap_wasm_bg.wasm"
+      }
+    },
+    "cap_declared_settings": {
+      "challengeCount": 80,
+      "saltSize": 32,
+      "difficulty": 4,
+      "instrumentation": false,
+      "rsw": true,
+      "rswT": 75000
+    },
+    "origin": "http://localhost:3000",
+    "samples": 1,
+    "issue_operations": 3000,
+    "concurrency": 32,
+    "http_client_workers": 8,
+    "http_client": "recorded Node worker pool with fixed total concurrency and per-worker HTTP/1.1 keep-alive agents; latency is request start through response headers",
+    "shar_action_cardinality": 1,
+    "rss_interval_ms": 50
+  },
+  "warnings": [
+    "Node CPU reference solve times are not accelerated-browser or energy evidence.",
+    "Live endpoint throughput includes loopback/network and configured storage latency.",
+    "Shar issuance uses 1 action scope(s); set SHAR_BENCH_ACTION_CARDINALITY=3000 for the high-cardinality abuse profile.",
+    "RSS samples use Linux /proc VmRSS and are reference-process evidence, not a stabilized container memory limit or a multi-host benchmark."
+  ],
+  "behavior": {
+    "shar_origin_request": {
+      "status": 200,
+      "body_shape": ["quote", "render", "time_lock", "token", "trust"]
+    },
+    "cap_raw_request": {
+      "status": 200,
+      "body_shape": ["challenges", "expires", "format", "token"]
+    },
+    "cap_browser_like_request": {
+      "status": 200,
+      "body_shape": ["challenges", "expires", "format", "token"]
+    }
+  },
+  "idle_memory": { "shar_rss_bytes": 128376832, "cap_rss_bytes": 157802496 },
+  "issuance": {
+    "shar": {
+      "operations": 3000,
+      "concurrency": 32,
+      "elapsed_ms": 1801.9879889999997,
+      "operations_per_second": 1664.8279668416815,
+      "latency": {
+        "samples": 3000,
+        "min_ms": 3.525423000000046,
+        "median_ms": 16.558160999999984,
+        "p95_ms": 31.828507000000002,
+        "max_ms": 118.94409200000001,
+        "mean_ms": 18.758170909999997
+      },
+      "response_body_bytes": {
+        "samples": 3000,
+        "min": 1824,
+        "median": 1855,
+        "p95": 1857,
+        "max": 1857,
+        "mean": 1854.3626666666667
+      },
+      "rss": {
+        "sample_count": 37,
+        "baseline_rss_bytes": 128516096,
+        "peak_rss_bytes": 178692096,
+        "final_rss_bytes": 178692096
+      },
+      "server_observed": {
+        "issued": 3000,
+        "engine_seconds": 36.080014999999996,
+        "handler_seconds": 42.873278000000006,
+        "mean_engine_ms": 12.026671666666667,
+        "mean_handler_ms": 14.29109266666667
+      }
+    },
+    "cap": {
+      "operations": 3000,
+      "concurrency": 32,
+      "elapsed_ms": 4830.107550000001,
+      "operations_per_second": 621.1041822453828,
+      "latency": {
+        "samples": 3000,
+        "min_ms": 22.226304999999684,
+        "median_ms": 48.02902499999982,
+        "p95_ms": 68.31205100000079,
+        "max_ms": 108.01008599999977,
+        "mean_ms": 50.888575070666626
+      },
+      "response_body_bytes": {
+        "samples": 3000,
+        "min": 2404,
+        "median": 2404,
+        "p95": 2404,
+        "max": 2404,
+        "mean": 2404
+      },
+      "rss": {
+        "sample_count": 98,
+        "baseline_rss_bytes": 157847552,
+        "peak_rss_bytes": 181993472,
+        "final_rss_bytes": 134389760
+      }
+    }
+  },
+  "cpu_reference_solve": {
+    "shar": {
+      "samples": 1,
+      "min_ms": 40.58697000000029,
+      "median_ms": 40.58697000000029,
+      "p95_ms": 40.58697000000029,
+      "max_ms": 40.58697000000029,
+      "mean_ms": 40.58697000000029
+    },
+    "cap": {
+      "samples": 1,
+      "min_ms": 409.64240299999983,
+      "median_ms": 409.64240299999983,
+      "p95_ms": 409.64240299999983,
+      "max_ms": 409.64240299999983,
+      "mean_ms": 409.64240299999983
+    }
+  },
+  "redemption": {
+    "shar": {
+      "samples": 1,
+      "min_ms": 44.517085999999836,
+      "median_ms": 44.517085999999836,
+      "p95_ms": 44.517085999999836,
+      "max_ms": 44.517085999999836,
+      "mean_ms": 44.517085999999836
+    },
+    "cap": {
+      "samples": 1,
+      "min_ms": 7.5051549999998315,
+      "median_ms": 7.5051549999998315,
+      "p95_ms": 7.5051549999998315,
+      "max_ms": 7.5051549999998315,
+      "mean_ms": 7.5051549999998315
+    }
+  },
+  "ga_gates": {
+    "accelerated_p95_and_energy": {
+      "status": "not_measured",
+      "reason": "requires reference-device browser and energy instrumentation"
+    },
+    "attacker_cost_ratio": {
+      "status": "not_measured",
+      "reason": "requires calibrated attacker hardware cost inputs"
+    },
+    "server_throughput_and_memory": {
+      "status": "reference_only",
+      "reason": "production gate requires isolated containers, sustained load, matching stores, idle-memory stabilization, and the full native/JavaScript deployment matrix"
+    }
+  }
+}

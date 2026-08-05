@@ -1,0 +1,232 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: shar-observations
+automountServiceAccountToken: true
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: shar-observations
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["pods/log"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: shar-observations
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: shar-observations
+subjects:
+  - kind: ServiceAccount
+    name: shar-observations
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shar-observations
+data:
+  config.alloy: |
+    discovery.kubernetes "shar_pods" {
+      role = "pod"
+
+      namespaces {
+        own_namespace = true
+      }
+
+      selectors {
+        role  = "pod"
+        label = "app.kubernetes.io/name=shar"
+      }
+    }
+
+    discovery.relabel "shar_pods" {
+      targets = discovery.kubernetes.shar_pods.targets
+
+      rule {
+        source_labels = ["__meta_kubernetes_pod_container_name"]
+        regex         = "shar"
+        action        = "keep"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_namespace"]
+        target_label  = "namespace"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_pod_name"]
+        target_label  = "pod"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_pod_container_name"]
+        target_label  = "container"
+      }
+
+      rule {
+        target_label = "service_name"
+        replacement  = "shar"
+      }
+    }
+
+    loki.source.kubernetes "shar_observations" {
+      targets    = discovery.relabel.shar_pods.output
+      forward_to = [loki.process.shar_observations.receiver]
+    }
+
+    loki.process "shar_observations" {
+      forward_to = [loki.write.shar_observations.receiver]
+
+      stage.json {
+        drop_malformed = true
+        expressions = {
+          observation_version = "version",
+          request_id          = "request_id",
+          method              = "method",
+          route               = "route",
+          status              = "status",
+          duration_ms         = "duration_ms",
+        }
+      }
+
+      stage.labels {
+        values = {
+          observation_version = "",
+        }
+      }
+
+      stage.match {
+        selector            = "{observation_version!=\"request-observation-v1\"}"
+        action              = "drop"
+        drop_counter_reason = "not_shar_request_observation"
+      }
+
+      stage.template {
+        source   = "safe_line"
+        template = `{"version":{{ toJson .observation_version }},"request_id":{{ toJson .request_id }},"method":{{ toJson .method }},"route":{{ toJson .route }},"status":{{ toJson .status }},"duration_ms":{{ toJson .duration_ms }}}`
+      }
+
+      stage.output {
+        source = "safe_line"
+      }
+
+      stage.structured_metadata {
+        values = {
+          request_id  = "",
+          method      = "",
+          route       = "",
+          status      = "",
+          duration_ms = "",
+        }
+      }
+
+      stage.label_keep {
+        values = [
+          "service_name",
+          "namespace",
+          "pod",
+          "container",
+          "observation_version",
+        ]
+      }
+    }
+
+    loki.write "shar_observations" {
+      endpoint {
+        url = sys.env("SHAR_LOKI_URL")
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shar-observations
+  labels:
+    app.kubernetes.io/name: shar-observations
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: shar-observations
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: shar-observations
+    spec:
+      serviceAccountName: shar-observations
+      automountServiceAccountToken: true
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: alloy
+          image: docker.io/grafana/alloy:v1.14.0@sha256:f50931848bd8178774521767bb46b905e1a081301950ff28d7623c9db7c01076
+          imagePullPolicy: IfNotPresent
+          args:
+            - run
+            - --server.http.listen-addr=0.0.0.0:12345
+            - --storage.path=/var/lib/alloy/data
+            - /etc/alloy/config.alloy
+          env:
+            - name: SHAR_LOKI_URL
+              valueFrom:
+                secretKeyRef:
+                  name: shar-observation-storage
+                  key: loki-url
+          ports:
+            - name: http
+              containerPort: 12345
+              protocol: TCP
+          volumeMounts:
+            - name: config
+              mountPath: /etc/alloy
+              readOnly: true
+            - name: data
+              mountPath: /var/lib/alloy
+          readinessProbe:
+            httpGet:
+              path: /-/ready
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 2
+          livenessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 2
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+      volumes:
+        - name: config
+          configMap:
+            name: shar-observations
+            items:
+              - key: config.alloy
+                path: config.alloy
+        - name: data
+          emptyDir:
+            sizeLimit: 128Mi

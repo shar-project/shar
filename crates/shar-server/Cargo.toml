@@ -1,0 +1,30 @@
+[package]
+name = "shar-server"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+axum = "0.8.9"
+base64.workspace = true
+getrandom = "0.3.4"
+num-bigint = { version = "0.4.6", features = ["rand"] }
+num-integer = "0.1.46"
+native-tls = "0.2.14"
+postgres = "0.19.14"
+postgres-native-tls = "0.5.3"
+rand = "0.8.6"
+redis = { version = "=1.4.1", features = ["tls-native-tls"] }
+rusqlite = { version = "0.32.1", features = ["bundled"] }
+serde.workspace = true
+serde_json.workspace = true
+serde_urlencoded = "0.7.1"
+sha2.workspace = true
+shar-core = { path = "../shar-core" }
+tokio = { version = "1.52.3", features = ["fs", "macros", "rt-multi-thread", "net", "signal", "time"] }
+url = "2.5.8"
+
+[dev-dependencies]
+tempfile = "3.27.0"
+tower = "0.5.3"

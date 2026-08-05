@@ -1,0 +1,187 @@
+{
+  "schema": "shar-cap-local-standalone-comparison-v1",
+  "captured_at": "2026-08-04T09:28:32.874Z",
+  "scope": {
+    "status": "local_reference_only",
+    "cap": "standalone@3.1.8",
+    "shar_variants": ["optimized Rust", "production JavaScript"],
+    "state": "Cap and Shar use the same external Redis service for atomic state; Shar retains its documented SQLite config store",
+    "isolation": "fresh Cap and Shar processes, fresh key/config state, stabilized process RSS, alternating Rust/JavaScript order per repetition",
+    "exclusions": [
+      "Redis process memory",
+      "container runtime overhead",
+      "managed-store network latency",
+      "energy and accelerated browser solve cost"
+    ]
+  },
+  "inputs": {
+    "repetitions": 3,
+    "issue_operations": 3000,
+    "concurrency": 32,
+    "http_client_workers": 1,
+    "shar_action_cardinality": 1,
+    "shar_state": "redis",
+    "solve_samples": 1,
+    "cap_settings": {
+      "challengeCount": 80,
+      "saltSize": 32,
+      "difficulty": 4,
+      "instrumentation": false,
+      "rsw": false
+    }
+  },
+  "variants": {
+    "rust": {
+      "repetitions": 3,
+      "shar_issuance_ops_per_second": {
+        "samples": 3,
+        "min": 2499.378242171586,
+        "median": 3340.7060005080784,
+        "p95": 3554.433201408887,
+        "max": 3554.433201408887,
+        "mean": 3131.5058146961837
+      },
+      "cap_issuance_ops_per_second": {
+        "samples": 3,
+        "min": 2686.7321327400937,
+        "median": 3229.178933173767,
+        "p95": 4118.113830069228,
+        "max": 4118.113830069228,
+        "mean": 3344.6749653276966
+      },
+      "shar_idle_rss_bytes": {
+        "samples": 3,
+        "min": 11005952,
+        "median": 11018240,
+        "p95": 11075584,
+        "max": 11075584,
+        "mean": 11033258.666666666
+      },
+      "cap_idle_rss_bytes": {
+        "samples": 3,
+        "min": 150327296,
+        "median": 152014848,
+        "p95": 152166400,
+        "max": 152166400,
+        "mean": 151502848
+      },
+      "per_run_throughput_ratio": {
+        "samples": 3,
+        "min": 0.8112223552722725,
+        "median": 0.9302670004629628,
+        "p95": 1.1007235198067662,
+        "max": 1.1007235198067662,
+        "mean": 0.9474042918473339
+      },
+      "per_run_idle_rss_ratio": {
+        "samples": 3,
+        "min": 0.0724005065610433,
+        "median": 0.07240915208613728,
+        "p95": 0.07367646658129207,
+        "max": 0.07367646658129207,
+        "mean": 0.07282870840949089
+      },
+      "quality": {
+        "issuance_relative_standard_deviation": {
+          "shar": 0.14543109763612794,
+          "cap": 0.17641126905776924
+        },
+        "idle_rss_relative_standard_deviation": {
+          "shar": 0.0027504158855207114,
+          "cap": 0.005501812040349536
+        },
+        "guidance": "values above 0.20 warrant more repetitions or a more isolated host; gate status still uses conservative all-run bounds"
+      }
+    },
+    "javascript": {
+      "repetitions": 3,
+      "shar_issuance_ops_per_second": {
+        "samples": 3,
+        "min": 685.0129126578067,
+        "median": 724.9445300416388,
+        "p95": 995.914167185305,
+        "max": 995.914167185305,
+        "mean": 801.9572032949168
+      },
+      "cap_issuance_ops_per_second": {
+        "samples": 3,
+        "min": 333.72602503892966,
+        "median": 3519.272913336044,
+        "p95": 3766.767563344472,
+        "max": 3766.767563344472,
+        "mean": 2539.922167239815
+      },
+      "shar_idle_rss_bytes": {
+        "samples": 3,
+        "min": 129056768,
+        "median": 129130496,
+        "p95": 131362816,
+        "max": 131362816,
+        "mean": 129850026.66666667
+      },
+      "cap_idle_rss_bytes": {
+        "samples": 3,
+        "min": 147886080,
+        "median": 151842816,
+        "p95": 151855104,
+        "max": 151855104,
+        "mean": 150528000
+      },
+      "per_run_throughput_ratio": {
+        "samples": 3,
+        "min": 0.18185696386574787,
+        "median": 0.28298861489580884,
+        "p95": 2.172274487604234,
+        "max": 2.172274487604234,
+        "mean": 0.8790400221219303
+      },
+      "per_run_idle_rss_ratio": {
+        "samples": 3,
+        "min": 0.84986783190376,
+        "median": 0.8504221628766421,
+        "p95": 0.8882703226699903,
+        "max": 0.8882703226699903,
+        "mean": 0.8628534391501308
+      },
+      "quality": {
+        "issuance_relative_standard_deviation": {
+          "shar": 0.17222084694796097,
+          "cap": 0.6154853517352289
+        },
+        "idle_rss_relative_standard_deviation": {
+          "shar": 0.008241253447589735,
+          "cap": 0.012410490293788667
+        },
+        "guidance": "values above 0.20 warrant more repetitions or a more isolated host; gate status still uses conservative all-run bounds"
+      }
+    }
+  },
+  "local_native_thresholds": {
+    "throughput_at_least_2x_cap": {
+      "threshold": 2,
+      "direction": "minimum",
+      "status": "fail",
+      "pass": false,
+      "observed_min": 0.8112223552722725,
+      "observed_median": 0.9302670004629628,
+      "observed_max": 1.1007235198067662
+    },
+    "idle_memory_at_most_half_cap": {
+      "threshold": 0.5,
+      "direction": "maximum",
+      "status": "pass",
+      "pass": true,
+      "observed_min": 0.0724005065610433,
+      "observed_median": 0.07240915208613728,
+      "observed_max": 0.07367646658129207
+    }
+  },
+  "raw_results": [
+    "rust-1.json",
+    "javascript-1.json",
+    "javascript-2.json",
+    "rust-2.json",
+    "rust-3.json",
+    "javascript-3.json"
+  ]
+}

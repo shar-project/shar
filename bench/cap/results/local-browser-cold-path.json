@@ -1,0 +1,98 @@
+{
+  "schema": "shar-cap-browser-cold-path-v1",
+  "environment": {
+    "captured_at": "2026-08-05T05:10:39.260Z",
+    "node": "v26.3.0",
+    "v8": "14.6.202.34-node.20",
+    "os": "linux 7.1.4-gentoo-dist-hardened",
+    "arch": "x64",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-1255U",
+    "logical_cpus": 12,
+    "load_average": [7.75, 6.95, 6.71],
+    "host": "#1 SMP PREEMPT_DYNAMIC Tue Jul 21 07:06:44 AEST 2026",
+    "browser": "Chromium",
+    "playwright": "1.62.1"
+  },
+  "inputs": {
+    "cap_widget": {
+      "tag": "widget@0.1.56",
+      "commit": "7849efa7f9ee19694c6f5ba73d0e7f82d37d086f",
+      "package": "cap-widget@0.1.56",
+      "integrity": "sha512-mAoFWzouxCjvi0B0Y0s7cRGGaLvJxifMVeNIHiFCkZme/9BOASWliN0aqz9wTUdlrt3Awm0UEA8h8DV1IDUuug=="
+    },
+    "cap_wasm": {
+      "package": "@cap.js/wasm@0.0.7",
+      "integrity": "sha512-IgUjrPOUBaOjTp+BkrhfEBBeQ4An7fQiSWWezDy9Uvd+OdTYm4+h3AJU0j/CpHYayp7FltZU+UePC6p28oGQaw==",
+      "browserPath": "browser/cap_wasm_bg.wasm"
+    }
+  },
+  "method": {
+    "cache": "new browser context per product; Cache-Control no-store; service workers blocked",
+    "transport": "loopback HTTP with Brotli quality 11 and Resource Timing",
+    "shar_resources": [
+      "/assets/shar/bytes-DXTL6aNa.js",
+      "/assets/shar/shar.js"
+    ],
+    "cap_resources": [
+      "published cap.min.js",
+      "eagerly fetched published browser WASM"
+    ],
+    "excluded": [
+      "HTML",
+      "benchmark-only Cap URL configuration script",
+      "optional dynamically loaded Shar trust-credit chunks",
+      "optional Shar locale entry points selected by the host application",
+      "HTTP/2 or HTTP/3 framing"
+    ]
+  },
+  "shar": {
+    "resources": [
+      {
+        "path": "/assets/shar/shar.js",
+        "transfer_size": 15454,
+        "encoded_body_size": 15154,
+        "decoded_body_size": 53807,
+        "duration_ms": 11.099999994039536
+      },
+      {
+        "path": "/assets/shar/bytes-DXTL6aNa.js",
+        "transfer_size": 869,
+        "encoded_body_size": 569,
+        "decoded_body_size": 1148,
+        "duration_ms": 2.4000000059604645
+      }
+    ],
+    "encoded_body_total": 15723,
+    "transfer_total": 16323,
+    "unexpected_requests": []
+  },
+  "cap": {
+    "resources": [
+      {
+        "path": "/assets/cap.js",
+        "transfer_size": 13130,
+        "encoded_body_size": 12830,
+        "decoded_body_size": 43729,
+        "duration_ms": 8.700000017881393
+      },
+      {
+        "path": "/assets/cap.wasm",
+        "transfer_size": 7417,
+        "encoded_body_size": 7117,
+        "decoded_body_size": 22608,
+        "duration_ms": 2.300000011920929
+      }
+    ],
+    "encoded_body_total": 19947,
+    "transfer_total": 20547,
+    "unexpected_requests": []
+  },
+  "shar_over_cap_encoded_body": 0.7882388329072041,
+  "gate": {
+    "requirement": "Shar default cold-path bytes <= 80% of Cap equivalent path",
+    "threshold": 0.8,
+    "observed": 0.7882388329072041,
+    "pass": true,
+    "scope": "cold-cache Chromium network capture; remaining browser/device matrix is still required"
+  }
+}

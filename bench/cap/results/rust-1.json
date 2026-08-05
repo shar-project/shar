@@ -1,0 +1,189 @@
+{
+  "schema": "shar-cap-live-reference-v1",
+  "environment": {
+    "captured_at": "2026-08-04T09:26:28.147Z",
+    "node": "v26.3.0",
+    "v8": "14.6.202.34-node.20",
+    "os": "linux 7.1.4-gentoo-dist-hardened",
+    "arch": "x64",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-1255U",
+    "logical_cpus": 12,
+    "load_average": [5.44, 6.89, 5.96],
+    "host": "#1 SMP PREEMPT_DYNAMIC Tue Jul 21 07:06:44 AEST 2026"
+  },
+  "inputs": {
+    "shar_endpoint": "http://127.0.0.1:4211",
+    "cap_endpoint_origin": "http://127.0.0.1:4210",
+    "cap": {
+      "schema": "shar-cap-inputs-v1",
+      "standalone": {
+        "tag": "standalone@3.1.8",
+        "commit": "1d4f246d29b691275ce0edbbc8290198ebf8bde8",
+        "repository": "https://github.com/tiagozip/cap.git",
+        "corePackage": "capjs-core@0.1.1"
+      },
+      "widget": {
+        "tag": "widget@0.1.56",
+        "commit": "7849efa7f9ee19694c6f5ba73d0e7f82d37d086f",
+        "package": "cap-widget@0.1.56",
+        "integrity": "sha512-mAoFWzouxCjvi0B0Y0s7cRGGaLvJxifMVeNIHiFCkZme/9BOASWliN0aqz9wTUdlrt3Awm0UEA8h8DV1IDUuug=="
+      },
+      "wasm": {
+        "package": "@cap.js/wasm@0.0.7",
+        "integrity": "sha512-IgUjrPOUBaOjTp+BkrhfEBBeQ4An7fQiSWWezDy9Uvd+OdTYm4+h3AJU0j/CpHYayp7FltZU+UePC6p28oGQaw==",
+        "browserPath": "browser/cap_wasm_bg.wasm"
+      }
+    },
+    "cap_declared_settings": {
+      "challengeCount": 80,
+      "saltSize": 32,
+      "difficulty": 4,
+      "instrumentation": false,
+      "rsw": false
+    },
+    "origin": "http://localhost:3000",
+    "samples": 1,
+    "issue_operations": 3000,
+    "concurrency": 32,
+    "http_client_workers": 1,
+    "http_client": "recorded Node worker pool with fixed total concurrency and per-worker HTTP/1.1 keep-alive agents; latency is request start through response headers",
+    "shar_action_cardinality": 1,
+    "rss_interval_ms": 50
+  },
+  "warnings": [
+    "Node CPU reference solve times are not accelerated-browser or energy evidence.",
+    "Live endpoint throughput includes loopback/network and configured storage latency.",
+    "Shar issuance uses 1 action scope(s); set SHAR_BENCH_ACTION_CARDINALITY=3000 for the high-cardinality abuse profile.",
+    "RSS samples use Linux /proc VmRSS and are reference-process evidence, not a stabilized container memory limit or a multi-host benchmark."
+  ],
+  "behavior": {
+    "shar_origin_request": {
+      "status": 200,
+      "body_shape": ["quote", "render", "time_lock", "token", "trust"]
+    },
+    "cap_raw_request": {
+      "status": 200,
+      "body_shape": ["challenge", "expires", "token"]
+    },
+    "cap_browser_like_request": {
+      "status": 200,
+      "body_shape": ["challenge", "expires", "token"]
+    }
+  },
+  "idle_memory": { "shar_rss_bytes": 11005952, "cap_rss_bytes": 152014848 },
+  "issuance": {
+    "shar": {
+      "operations": 3000,
+      "concurrency": 32,
+      "elapsed_ms": 898.0137730000001,
+      "operations_per_second": 3340.7060005080784,
+      "latency": {
+        "samples": 3000,
+        "min_ms": 1.2288550000000669,
+        "median_ms": 8.287495000000035,
+        "p95_ms": 17.531661999999983,
+        "max_ms": 49.60231599999997,
+        "mean_ms": 9.306783324999978
+      },
+      "response_body_bytes": {
+        "samples": 3000,
+        "min": 1824,
+        "median": 1855,
+        "p95": 1857,
+        "max": 1857,
+        "mean": 1854.3633333333332
+      },
+      "rss": {
+        "sample_count": 19,
+        "baseline_rss_bytes": 11030528,
+        "peak_rss_bytes": 16031744,
+        "final_rss_bytes": 16031744
+      },
+      "server_observed": {
+        "issued": 3000,
+        "engine_seconds": 2.027528,
+        "handler_seconds": 2.112282,
+        "mean_engine_ms": 0.6758426666666667,
+        "mean_handler_ms": 0.704094
+      }
+    },
+    "cap": {
+      "operations": 3000,
+      "concurrency": 32,
+      "elapsed_ms": 728.488848,
+      "operations_per_second": 4118.113830069228,
+      "latency": {
+        "samples": 3000,
+        "min_ms": 1.105876999999964,
+        "median_ms": 6.557122000000163,
+        "p95_ms": 15.206900000000132,
+        "max_ms": 38.88577700000019,
+        "mean_ms": 7.490787271999978
+      },
+      "response_body_bytes": {
+        "samples": 3000,
+        "min": 333,
+        "median": 333,
+        "p95": 333,
+        "max": 333,
+        "mean": 333
+      },
+      "rss": {
+        "sample_count": 16,
+        "baseline_rss_bytes": 151900160,
+        "peak_rss_bytes": 163561472,
+        "final_rss_bytes": 94076928
+      }
+    }
+  },
+  "cpu_reference_solve": {
+    "shar": {
+      "samples": 1,
+      "min_ms": 70.3164099999999,
+      "median_ms": 70.3164099999999,
+      "p95_ms": 70.3164099999999,
+      "max_ms": 70.3164099999999,
+      "mean_ms": 70.3164099999999
+    },
+    "cap": {
+      "samples": 1,
+      "min_ms": 8888.17454,
+      "median_ms": 8888.17454,
+      "p95_ms": 8888.17454,
+      "max_ms": 8888.17454,
+      "mean_ms": 8888.17454
+    }
+  },
+  "redemption": {
+    "shar": {
+      "samples": 1,
+      "min_ms": 21.64001499999995,
+      "median_ms": 21.64001499999995,
+      "p95_ms": 21.64001499999995,
+      "max_ms": 21.64001499999995,
+      "mean_ms": 21.64001499999995
+    },
+    "cap": {
+      "samples": 1,
+      "min_ms": 25.263911000000007,
+      "median_ms": 25.263911000000007,
+      "p95_ms": 25.263911000000007,
+      "max_ms": 25.263911000000007,
+      "mean_ms": 25.263911000000007
+    }
+  },
+  "ga_gates": {
+    "accelerated_p95_and_energy": {
+      "status": "not_measured",
+      "reason": "requires reference-device browser and energy instrumentation"
+    },
+    "attacker_cost_ratio": {
+      "status": "not_measured",
+      "reason": "requires calibrated attacker hardware cost inputs"
+    },
+    "server_throughput_and_memory": {
+      "status": "reference_only",
+      "reason": "production gate requires isolated containers, sustained load, matching stores, idle-memory stabilization, and the full native/JavaScript deployment matrix"
+    }
+  }
+}

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' 'sha256-ddKY9mcU4oEt4kmSTAkH4aoZRTe0pULnez1FJ3cVbgU='; style-src 'self'; connect-src 'self'"
+    />
+    <title>Shar render-v1 conformance</title>
+    <link rel="stylesheet" href="/test/browser/render-harness.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "@shar/server": "/packages/server/dist/index.js",
+          "@shar/server/browser": "/packages/server/dist/browser.js",
+          "@shar/server/trust": "/packages/server/dist/trust.js",
+          "@shar/widget": "/packages/widget/dist/index.js",
+          "@noble/curves/": "/node_modules/@noble/curves/",
+          "@noble/hashes/": "/node_modules/@noble/hashes/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <main>
+      <h1>Shar render-v1 conformance</h1>
+      <p>One canonical triangle program, independently executed.</p>
+      <button id="run" type="button">Run conformance</button>
+      <p id="status" role="status" aria-live="polite">Ready</p>
+      <dl>
+        <dt>CPU reference</dt>
+        <dd id="cpu">Not run</dd>
+        <dt>WebGL2</dt>
+        <dd id="webgl2">Not run</dd>
+        <dt>WebGPU</dt>
+        <dd id="webgpu">Not run</dd>
+        <dt>CSS engine</dt>
+        <dd id="css">Not run</dd>
+        <dt>Adaptive</dt>
+        <dd id="adaptive">Not run</dd>
+      </dl>
+    </main>
+    <script type="module" src="/test/browser/render-harness.js"></script>
+  </body>
+</html>

@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shar.dev/schema/v1/audit-event.json",
+  "title": "Shar privacy-filtered audit event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "kind",
+    "occurred_at",
+    "tenant",
+    "site_key",
+    "action"
+  ],
+  "properties": {
+    "version": { "const": "audit-v1" },
+    "kind": {
+      "enum": [
+        "challenge_issued",
+        "proof_redeemed",
+        "site_verified",
+        "fallback_completed",
+        "proof_failed",
+        "verification_failed"
+      ]
+    },
+    "occurred_at": { "type": "integer", "minimum": 0 },
+    "tenant": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "x-shar-maxUtf8Bytes": 128,
+      "x-shar-noControlCharacters": true
+    },
+    "site_key": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "x-shar-maxUtf8Bytes": 256,
+      "x-shar-noControlCharacters": true
+    },
+    "action": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "x-shar-maxUtf8Bytes": 128,
+      "x-shar-noControlCharacters": true
+    },
+    "tier": { "type": "integer", "minimum": 0, "maximum": 32 },
+    "backend": { "enum": ["webgpu", "webgl2", "css"] },
+    "code": { "type": "string", "pattern": "^[a-z0-9_]{1,128}$" }
+  }
+}

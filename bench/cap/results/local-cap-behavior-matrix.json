@@ -1,0 +1,77 @@
+{
+  "schema": "shar-cap-behavior-matrix-v1",
+  "environment": {
+    "captured_at": "2026-08-03T11:56:37.600Z",
+    "node": "v26.3.0",
+    "v8": "14.6.202.34-node.20",
+    "os": "linux 7.1.4-gentoo-dist-hardened",
+    "arch": "x64",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-1255U",
+    "logical_cpus": 12,
+    "load_average": [5.66, 6.43, 7.36],
+    "host": "#1 SMP PREEMPT_DYNAMIC Tue Jul 21 07:06:44 AEST 2026"
+  },
+  "cap": {
+    "schema": "shar-cap-inputs-v1",
+    "standalone": {
+      "tag": "standalone@3.1.8",
+      "commit": "1d4f246d29b691275ce0edbbc8290198ebf8bde8",
+      "repository": "https://github.com/tiagozip/cap.git",
+      "corePackage": "capjs-core@0.1.1"
+    },
+    "widget": {
+      "tag": "widget@0.1.56",
+      "commit": "7849efa7f9ee19694c6f5ba73d0e7f82d37d086f",
+      "package": "cap-widget@0.1.56",
+      "integrity": "sha512-mAoFWzouxCjvi0B0Y0s7cRGGaLvJxifMVeNIHiFCkZme/9BOASWliN0aqz9wTUdlrt3Awm0UEA8h8DV1IDUuug=="
+    },
+    "wasm": {
+      "package": "@cap.js/wasm@0.0.7",
+      "integrity": "sha512-IgUjrPOUBaOjTp+BkrhfEBBeQ4An7fQiSWWezDy9Uvd+OdTYm4+h3AJU0j/CpHYayp7FltZU+UePC6p28oGQaw==",
+      "browserPath": "browser/cap_wasm_bg.wasm"
+    }
+  },
+  "settings": {
+    "standalone": "standalone@3.1.8",
+    "origin": "http://localhost:3000",
+    "isolated_redis_prefix": true
+  },
+  "cases": {
+    "sha_pow_and_single_use_siteverify": {
+      "challenge_status": 200,
+      "challenge_format": "sha256-pow",
+      "redemption_status": 200,
+      "siteverify_status": 200,
+      "replay_status": 404
+    },
+    "rsw_and_siteverify": {
+      "challenge_status": 200,
+      "protocols": ["rsw"],
+      "iterations": 10000,
+      "redemption_status": 200,
+      "siteverify_status": 200
+    },
+    "instrumentation_policy_rejection": {
+      "challenge_status": 200,
+      "instrumentation_present": true,
+      "redemption_status": 403,
+      "reason": "missing_instrumentation_response"
+    },
+    "user_agent_policy_rejection": {
+      "non_browser_status": 403,
+      "browser_status": 200
+    },
+    "rate_limit_rejection": {
+      "request_at_limit_status": 200,
+      "request_beyond_limit_status": 429
+    },
+    "invalid_proof_allows_replacement": {
+      "invalid_redemption_status": 403,
+      "replacement_challenge_status": 200
+    }
+  },
+  "interpretation": {
+    "scope": "pinned Cap behavior evidence, not a Shar acceptance policy",
+    "shar_difference": "Shar permits transport backpressure and invalid-proof failure, but UA and instrumentation signals can only price future finite work and cannot reject a correct issued proof."
+  }
+}

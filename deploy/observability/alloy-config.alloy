@@ -1,0 +1,110 @@
+discovery.kubernetes "shar_pods" {
+  role = "pod"
+
+  namespaces {
+    own_namespace = true
+  }
+
+  selectors {
+    role  = "pod"
+    label = "app.kubernetes.io/name=shar"
+  }
+}
+
+discovery.relabel "shar_pods" {
+  targets = discovery.kubernetes.shar_pods.targets
+
+  rule {
+    source_labels = ["__meta_kubernetes_pod_container_name"]
+    regex         = "shar"
+    action        = "keep"
+  }
+
+  rule {
+    source_labels = ["__meta_kubernetes_namespace"]
+    target_label  = "namespace"
+  }
+
+  rule {
+    source_labels = ["__meta_kubernetes_pod_name"]
+    target_label  = "pod"
+  }
+
+  rule {
+    source_labels = ["__meta_kubernetes_pod_container_name"]
+    target_label  = "container"
+  }
+
+  rule {
+    target_label = "service_name"
+    replacement  = "shar"
+  }
+}
+
+loki.source.kubernetes "shar_observations" {
+  targets    = discovery.relabel.shar_pods.output
+  forward_to = [loki.process.shar_observations.receiver]
+}
+
+loki.process "shar_observations" {
+  forward_to = [loki.write.shar_observations.receiver]
+
+  stage.json {
+    drop_malformed = true
+    expressions = {
+      observation_version = "version",
+      request_id          = "request_id",
+      method              = "method",
+      route               = "route",
+      status              = "status",
+      duration_ms         = "duration_ms",
+    }
+  }
+
+  stage.labels {
+    values = {
+      observation_version = "",
+    }
+  }
+
+  stage.match {
+    selector            = "{observation_version!=\"request-observation-v1\"}"
+    action              = "drop"
+    drop_counter_reason = "not_shar_request_observation"
+  }
+
+  stage.template {
+    source   = "safe_line"
+    template = `{"version":{{ toJson .observation_version }},"request_id":{{ toJson .request_id }},"method":{{ toJson .method }},"route":{{ toJson .route }},"status":{{ toJson .status }},"duration_ms":{{ toJson .duration_ms }}}`
+  }
+
+  stage.output {
+    source = "safe_line"
+  }
+
+  stage.structured_metadata {
+    values = {
+      request_id  = "",
+      method      = "",
+      route       = "",
+      status      = "",
+      duration_ms = "",
+    }
+  }
+
+  stage.label_keep {
+    values = [
+      "service_name",
+      "namespace",
+      "pod",
+      "container",
+      "observation_version",
+    ]
+  }
+}
+
+loki.write "shar_observations" {
+  endpoint {
+    url = sys.env("SHAR_LOKI_URL")
+  }
+}

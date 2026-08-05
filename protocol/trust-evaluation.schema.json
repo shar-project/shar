@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shar.dev/schema/v1/trust-evaluation.json",
+  "title": "Shar blinded trust-credit evaluation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "suite",
+    "key_id",
+    "evaluated",
+    "proof",
+    "issued_at",
+    "expires_at"
+  ],
+  "properties": {
+    "version": { "const": "trust-evaluation-v1" },
+    "suite": { "const": "ristretto255-SHA512" },
+    "key_id": { "type": "string", "pattern": "^[A-Za-z0-9_-]+$" },
+    "evaluated": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{43}$"
+    },
+    "proof": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{86}$"
+    },
+    "issued_at": { "type": "integer", "minimum": 0 },
+    "expires_at": { "type": "integer", "minimum": 0 }
+  }
+}

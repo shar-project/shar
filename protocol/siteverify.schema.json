@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shar.dev/schema/v1/siteverify.json",
+  "title": "Shar site verification exchange",
+  "oneOf": [{ "$ref": "#/$defs/request" }, { "$ref": "#/$defs/response" }],
+  "$defs": {
+    "request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["token", "secret"],
+      "properties": {
+        "token": { "type": "string", "pattern": "^shr1_[A-Za-z0-9_-]+$" },
+        "secret": { "type": "string", "pattern": "^shrs1_[A-Za-z0-9_-]+$" },
+        "tenant": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "x-shar-maxUtf8Bytes": 128,
+          "x-shar-noControlCharacters": true
+        },
+        "site_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-shar-maxUtf8Bytes": 256,
+          "x-shar-noControlCharacters": true
+        },
+        "action": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "x-shar-maxUtf8Bytes": 128,
+          "x-shar-noControlCharacters": true
+        },
+        "origin": {
+          "type": "string",
+          "format": "uri",
+          "maxLength": 512,
+          "x-shar-maxUtf8Bytes": 512,
+          "x-shar-noControlCharacters": true
+        },
+        "region": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "x-shar-maxUtf8Bytes": 64,
+          "x-shar-noControlCharacters": true
+        },
+        "session_binding": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-shar-maxUtf8Bytes": 256,
+          "x-shar-noControlCharacters": true
+        }
+      }
+    },
+    "receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "tier",
+        "time_lock_iterations",
+        "render_rounds",
+        "rendering_backend",
+        "completed_at"
+      ],
+      "properties": {
+        "version": { "const": "work-receipt-v1" },
+        "tier": { "type": "integer", "minimum": 0, "maximum": 32 },
+        "time_lock_iterations": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "render_rounds": { "type": "integer", "minimum": 1, "maximum": 65536 },
+        "rendering_backend": { "enum": ["webgpu", "webgl2", "css"] },
+        "completed_at": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "response": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "success",
+        "tenant",
+        "site_key",
+        "action",
+        "origin",
+        "receipt"
+      ],
+      "properties": {
+        "success": { "const": true },
+        "tenant": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "x-shar-maxUtf8Bytes": 128,
+          "x-shar-noControlCharacters": true
+        },
+        "site_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "x-shar-maxUtf8Bytes": 256,
+          "x-shar-noControlCharacters": true
+        },
+        "action": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "x-shar-maxUtf8Bytes": 128,
+          "x-shar-noControlCharacters": true
+        },
+        "origin": {
+          "type": "string",
+          "format": "uri",
+          "maxLength": 512,
+          "x-shar-maxUtf8Bytes": 512,
+          "x-shar-noControlCharacters": true
+        },
+        "region": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "x-shar-maxUtf8Bytes": 64,
+          "x-shar-noControlCharacters": true
+        },
+        "receipt": { "$ref": "#/$defs/receipt" },
+        "score": { "const": 1 }
+      }
+    }
+  }
+}

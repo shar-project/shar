@@ -1,0 +1,52 @@
+{
+  "schema": "shar-timelock-solver-calibration-v1",
+  "environment": {
+    "captured_at": "2026-08-04T06:58:02.550Z",
+    "node": "v26.3.0",
+    "v8": "14.6.202.34-node.20",
+    "os": "linux 7.1.4-gentoo-dist-hardened",
+    "arch": "x64",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-1255U",
+    "logical_cpus": 12,
+    "load_average": [3.01, 4.48, 4.09],
+    "host": "#1 SMP PREEMPT_DYNAMIC Tue Jul 21 07:06:44 AEST 2026"
+  },
+  "method": {
+    "implementation": "pure JavaScript BigInt solveTimeLock",
+    "modulus_bits": 2048,
+    "warmup_iterations": 10000,
+    "measured_iterations": 100000,
+    "repetitions": 5,
+    "caveat": "Local Node throughput validates conservative defaults only; browser/device and energy evidence remains required for GA."
+  },
+  "output": "ZGPrs1JxZb5n6LaOgJfeHbA6QrFHWNApByJhF0mPl783G4Cdo-XcIt-H4pnIgZDSW-tT4MQgI8po_GAMPXQSRbqUlscJaY7gpdzcnsm9PJpid1uzEETW75sYMtdEZaVlqa5VC79bGCGBZDCjKiaUBz4pWA1p-_pTgqBxIZHwJeK-DzqHaYA9u97D7A_V7Q6MB781vl2Agukgl5YKLKUXbb2ICblhFlCNyq6RhKY62DpHHG69szAaG4AjP63eNfmJozbQ01Zviw5fdMfLHLo8KJ2WPbolUjEV4aN0rSat_3w3NotyktngxmUG_2CfFy3ZQZSMkDgBPbOex-QpK7QLpw",
+  "duration_ms": {
+    "samples": 5,
+    "min_ms": 383.152384,
+    "median_ms": 448.37816399999997,
+    "p95_ms": 527.477853,
+    "max_ms": 527.477853,
+    "mean_ms": 461.7167684
+  },
+  "iterations_per_second": {
+    "samples": 5,
+    "min": 189581.4192600803,
+    "median": 223026.02586150917,
+    "p95": 260992.76469593885,
+    "max": 260992.76469593885,
+    "mean": 219429.59201894872
+  },
+  "default_policy": {
+    "iteration_allowance_per_second": 100000,
+    "tier_32_additional_iterations": "4398046510080",
+    "estimated_tier_32_lifetime_seconds": 43984411,
+    "maximum_lifetime_seconds": 63072000
+  },
+  "gate": {
+    "requirement": "local minimum pure-JavaScript throughput exceeds the default lifetime allowance",
+    "observed": 189581.4192600803,
+    "threshold": 100000,
+    "pass": true,
+    "ga_scope_pass": false
+  }
+}

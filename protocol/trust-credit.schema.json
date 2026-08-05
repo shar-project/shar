@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shar.dev/schema/v1/trust-credit.json",
+  "title": "Shar blinded trust credit",
+  "$defs": {
+    "base64url": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]+$"
+    },
+    "token": {
+      "type": "string",
+      "minLength": 12,
+      "maxLength": 4096,
+      "pattern": "^shrtrust1_[A-Za-z0-9_-]+$"
+    },
+    "plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "suite",
+        "token_type",
+        "key_id",
+        "public_key",
+        "challenge_digest",
+        "issued_at",
+        "expires_at"
+      ],
+      "properties": {
+        "mode": { "const": "voprf-v1" },
+        "suite": { "const": "ristretto255-SHA512" },
+        "token_type": { "const": "credit" },
+        "key_id": { "$ref": "#/$defs/base64url" },
+        "public_key": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{43}$"
+        },
+        "challenge_digest": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{43}$"
+        },
+        "issued_at": { "type": "integer", "minimum": 0 },
+        "expires_at": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

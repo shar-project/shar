@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shar.example/schemas/cap-calibration-v1.json",
+  "title": "Shar and Cap calibrated performance/economics evidence",
+  "type": "object",
+  "required": [
+    "schema",
+    "environment",
+    "default_benign",
+    "attacker_equal_benign",
+    "sustained_abuse"
+  ],
+  "properties": {
+    "schema": { "const": "shar-cap-calibration-v1" },
+    "environment": {
+      "type": "object",
+      "required": ["run_id", "captured_at", "methodology_url"],
+      "properties": {
+        "run_id": { "type": "string", "minLength": 1 },
+        "captured_at": { "type": "string", "format": "date-time" },
+        "methodology_url": { "type": "string", "minLength": 1 }
+      }
+    },
+    "default_benign": {
+      "type": "object",
+      "required": ["cap", "shar"],
+      "properties": {
+        "cap": { "$ref": "#/$defs/benign" },
+        "shar": { "$ref": "#/$defs/benign" }
+      }
+    },
+    "attacker_equal_benign": {
+      "type": "object",
+      "required": ["target_joules", "normalization_method", "cap", "shar"],
+      "properties": {
+        "target_joules": { "type": "number", "exclusiveMinimum": 0 },
+        "normalization_method": { "type": "string", "minLength": 1 },
+        "cap": { "$ref": "#/$defs/attacker" },
+        "shar": { "$ref": "#/$defs/attacker" }
+      }
+    },
+    "sustained_abuse": {
+      "type": "object",
+      "required": [
+        "revenue_usd_per_accepted_request",
+        "sustained_start_tier",
+        "tiers"
+      ],
+      "properties": {
+        "revenue_usd_per_accepted_request": {
+          "type": "number",
+          "minimum": 0
+        },
+        "sustained_start_tier": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32
+        },
+        "tiers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "tier",
+              "attacker_cost_usd_per_accepted_request",
+              "samples"
+            ],
+            "properties": {
+              "tier": { "type": "integer", "minimum": 0, "maximum": 32 },
+              "attacker_cost_usd_per_accepted_request": {
+                "type": "number",
+                "minimum": 0
+              },
+              "samples": { "type": "integer", "minimum": 30 }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "benign": {
+      "type": "object",
+      "required": ["device", "samples", "p95_ms", "median_joules"],
+      "properties": {
+        "device": { "type": "string", "minLength": 1 },
+        "samples": { "type": "integer", "minimum": 30 },
+        "p95_ms": { "type": "number", "exclusiveMinimum": 0 },
+        "median_joules": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "attacker": {
+      "type": "object",
+      "required": [
+        "hardware",
+        "samples",
+        "observed_benign_joules",
+        "cost_usd_per_accepted_request"
+      ],
+      "properties": {
+        "hardware": { "type": "string", "minLength": 1 },
+        "samples": { "type": "integer", "minimum": 30 },
+        "observed_benign_joules": { "type": "number", "exclusiveMinimum": 0 },
+        "cost_usd_per_accepted_request": { "type": "number", "minimum": 0 }
+      }
+    }
+  }
+}

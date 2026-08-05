@@ -1,0 +1,39 @@
+:root {
+  color-scheme: light dark;
+  font:
+    16px/1.5 system-ui,
+    sans-serif;
+}
+body {
+  margin: 0;
+  padding: 2rem;
+}
+main {
+  max-width: 58rem;
+  margin: auto;
+}
+button {
+  font: inherit;
+  padding: 0.6rem 1rem;
+}
+dl {
+  display: grid;
+  grid-template-columns: 10rem 1fr;
+  gap: 0.5rem 1rem;
+}
+dt {
+  font-weight: 700;
+}
+dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.pass {
+  color: #198754;
+}
+.skip {
+  color: #946200;
+}
+.fail {
+  color: #c33;
+}

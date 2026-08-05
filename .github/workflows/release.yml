@@ -1,0 +1,264 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    name: Validate and stage release candidates
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+      - run: rustup toolchain install 1.94.0 --profile minimal --target wasm32-unknown-unknown
+      - run: scripts/build-widget-wasm.sh --check
+      - run: npm ci --ignore-scripts
+      - run: node scripts/check-release.mjs "$GITHUB_REF_NAME"
+      - run: npm run check:deployments
+      - run: npm run check:base-images
+      - run: npm run check:workflows
+      - name: Validate the production observation collector
+        run: docker run --rm --user 10001:10001 -v "$PWD/deploy/observability:/etc/shar-observability:ro" docker.io/grafana/alloy:v1.14.0@sha256:f50931848bd8178774521767bb46b905e1a081301950ff28d7623c9db7c01076 validate /etc/shar-observability/alloy-config.alloy
+      - run: npm test
+      - run: mkdir release
+      - run: npm pack --workspaces --pack-destination release
+      - run: npm sbom --workspace=@shar/server --sbom-format=cyclonedx > release/shar-server.cdx.json
+      - run: npm sbom --workspace=@shar/widget --sbom-format=cyclonedx > release/shar-widget.cdx.json
+      - run: npm sbom --workspace=@shar/cap-compat --sbom-format=cyclonedx > release/shar-cap-compat.cdx.json
+      - run: cd release && sha256sum *.tgz *.cdx.json > SHA256SUMS
+      - run: cd release && sha256sum --check SHA256SUMS
+      - name: Install and import the exact package candidates
+        run: |
+          npm install --prefix "$RUNNER_TEMP/shar-release-smoke" --ignore-scripts --no-audit --no-fund release/*.tgz
+          node scripts/smoke-package-candidates.mjs "$RUNNER_TEMP/shar-release-smoke" "${GITHUB_REF_NAME#v}"
+      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        with:
+          name: npm-release-candidate
+          path: release/
+          if-no-files-found: error
+          retention-days: 1
+
+  packages:
+    name: Sign and publish tested packages
+    needs: [preflight, container-security]
+    runs-on: ubuntu-24.04
+    environment: release
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6
+        with:
+          name: npm-release-candidate
+          path: release
+      - run: cd release && sha256sum --check SHA256SUMS
+      - uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac # v3
+      - name: Sign and verify release files with GitHub OIDC
+        env:
+          CERTIFICATE_IDENTITY: https://github.com/${{ github.repository }}/.github/workflows/release.yml@${{ github.ref }}
+          OIDC_ISSUER: https://token.actions.githubusercontent.com
+        run: |
+          for artifact in release/*.tgz release/*.cdx.json release/SHA256SUMS; do
+            cosign sign-blob --yes --bundle "${artifact}.sigstore.json" "$artifact"
+            cosign verify-blob --bundle "${artifact}.sigstore.json" --certificate-identity "$CERTIFICATE_IDENTITY" --certificate-oidc-issuer "$OIDC_ISSUER" "$artifact"
+          done
+      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        with:
+          name: npm-release
+          path: release/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Publish npm packages with trusted publishing
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          npm publish "release/shar-server-${version}.tgz" --access public
+          npm publish "release/shar-widget-${version}.tgz" --access public
+          npm publish "release/shar-cap-compat-${version}.tgz" --access public
+
+  container-security:
+    name: Pre-publish ${{ matrix.image }} ${{ matrix.arch }} vulnerability gate
+    needs: preflight
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: rust
+            dockerfile: deploy/docker/Dockerfile.rust
+            arch: amd64
+          - image: rust
+            dockerfile: deploy/docker/Dockerfile.rust
+            arch: arm64
+          - image: javascript
+            dockerfile: deploy/docker/Dockerfile.javascript
+            arch: amd64
+          - image: javascript
+            dockerfile: deploy/docker/Dockerfile.javascript
+            arch: arm64
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - name: Build the exact platform as an OCI archive without publishing
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          platforms: linux/${{ matrix.arch }}
+          outputs: type=oci,dest=${{ runner.temp }}/shar-release-security-${{ matrix.image }}-${{ matrix.arch }}.tar
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - id: complete-vulnerability-report
+        name: Report all vulnerabilities, including upstream-unfixed findings
+        uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2 # v7.4.0
+        with:
+          image: oci-archive:${{ runner.temp }}/shar-release-security-${{ matrix.image }}-${{ matrix.arch }}.tar
+          fail-build: false
+          only-fixed: false
+          output-format: json
+      - name: Retain the complete vulnerability report
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        with:
+          name: release-container-vulnerabilities-${{ matrix.image }}-${{ matrix.arch }}
+          path: ${{ steps.complete-vulnerability-report.outputs.json }}
+          if-no-files-found: error
+          retention-days: 14
+      - name: Fail on actionable high or critical vulnerabilities
+        uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2 # v7.4.0
+        with:
+          image: oci-archive:${{ runner.temp }}/shar-release-security-${{ matrix.image }}-${{ matrix.arch }}.tar
+          fail-build: true
+          severity-cutoff: high
+          only-fixed: true
+          output-format: table
+
+  containers:
+    name: Publish ${{ matrix.image }} container
+    needs: container-security
+    runs-on: ubuntu-24.04
+    environment: release
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: rust
+            dockerfile: deploy/docker/Dockerfile.rust
+          - image: javascript
+            dockerfile: deploy/docker/Dockerfile.javascript
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - id: image
+        name: Normalize image name
+        run: echo "name=ghcr.io/${GITHUB_REPOSITORY,,}/shar-${{ matrix.image }}" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: metadata
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5
+        with:
+          images: ${{ steps.image.outputs.name }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest
+          labels: |
+            org.opencontainers.image.licenses=MIT
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+      - id: push
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.metadata.outputs.tags }}
+          labels: ${{ steps.metadata.outputs.labels }}
+          provenance: mode=max
+          sbom: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3
+        with:
+          subject-name: ${{ steps.image.outputs.name }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
+      - uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac # v3
+      - name: Sign and verify the published multi-architecture index
+        env:
+          IMAGE_REF: ${{ steps.image.outputs.name }}@${{ steps.push.outputs.digest }}
+          CERTIFICATE_IDENTITY: https://github.com/${{ github.repository }}/.github/workflows/release.yml@${{ github.ref }}
+          OIDC_ISSUER: https://token.actions.githubusercontent.com
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cosign sign --yes "$IMAGE_REF"
+          cosign verify --certificate-identity "$CERTIFICATE_IDENTITY" --certificate-oidc-issuer "$OIDC_ISSUER" "$IMAGE_REF"
+          gh attestation verify "oci://$IMAGE_REF" -R "$GITHUB_REPOSITORY"
+      - run: mkdir release
+      - name: Extract exact per-platform SPDX attestations
+        env:
+          IMAGE_REF: ${{ steps.image.outputs.name }}@${{ steps.push.outputs.digest }}
+        run: |
+          docker buildx imagetools inspect --format '{{json (index .SBOM "linux/amd64")}}' "$IMAGE_REF" | jq -e '.SPDX | select(.spdxVersion | startswith("SPDX-"))' > "release/shar-${{ matrix.image }}-linux-amd64.spdx.json"
+          docker buildx imagetools inspect --format '{{json (index .SBOM "linux/arm64")}}' "$IMAGE_REF" | jq -e '.SPDX | select(.spdxVersion | startswith("SPDX-"))' > "release/shar-${{ matrix.image }}-linux-arm64.spdx.json"
+          (cd release && sha256sum "shar-${{ matrix.image }}-linux-amd64.spdx.json" "shar-${{ matrix.image }}-linux-arm64.spdx.json" > "shar-${{ matrix.image }}-SBOM-SHA256SUMS")
+      - name: Sign platform SBOMs and their checksum manifest
+        env:
+          CERTIFICATE_IDENTITY: https://github.com/${{ github.repository }}/.github/workflows/release.yml@${{ github.ref }}
+          OIDC_ISSUER: https://token.actions.githubusercontent.com
+        run: |
+          for artifact in release/*.spdx.json release/*-SBOM-SHA256SUMS; do
+            cosign sign-blob --yes --bundle "${artifact}.sigstore.json" "$artifact"
+            cosign verify-blob --bundle "${artifact}.sigstore.json" --certificate-identity "$CERTIFICATE_IDENTITY" --certificate-oidc-issuer "$OIDC_ISSUER" "$artifact"
+          done
+      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        with:
+          name: container-${{ matrix.image }}-release
+          path: release/
+          if-no-files-found: error
+          retention-days: 14
+
+  github-release:
+    name: Publish GitHub release
+    needs: [packages, containers]
+    runs-on: ubuntu-24.04
+    environment: release
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6
+        with:
+          pattern: "*-release"
+          path: release
+          merge-multiple: true
+      - name: Create immutable release record
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create "$GITHUB_REF_NAME" release/* --verify-tag --generate-notes --title "Shar $GITHUB_REF_NAME"

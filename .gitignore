@@ -1,0 +1,11 @@
+/target/
+/dist/
+/packages/*/dist/
+/node_modules/
+/playwright-report/
+/test-results/
+/.bench/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+.DS_Store

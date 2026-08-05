@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shar.dev/schema/v1/admin-audit.json",
+  "title": "Shar scoped administrative audit response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["tenant", "site_key", "action", "events"],
+  "properties": {
+    "tenant": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "x-shar-maxUtf8Bytes": 128,
+      "x-shar-noControlCharacters": true
+    },
+    "site_key": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "x-shar-maxUtf8Bytes": 256,
+      "x-shar-noControlCharacters": true
+    },
+    "action": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "x-shar-maxUtf8Bytes": 128,
+      "x-shar-noControlCharacters": true
+    },
+    "events": {
+      "type": "array",
+      "maxItems": 100,
+      "items": { "$ref": "audit-event.json" }
+    }
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "version": "work-price-vectors-v1",
+  "policy": {
+    "version": "policy-test-v1",
+    "base_iterations": "16",
+    "base_render_rounds": 1,
+    "quiet_window_seconds": 60,
+    "base_lifetime_seconds": 120,
+    "iteration_allowance": "1000",
+    "round_allowance_seconds": 1,
+    "max_lifetime_seconds": 86400
+  },
+  "now": 1800000000,
+  "vectors": [
+    {
+      "name": "baseline",
+      "pressure": {
+        "base_tier": 0,
+        "velocity_tier": 0,
+        "outstanding_tier": 0,
+        "network_tier": 0,
+        "failure_debt": 0,
+        "assurance_debt": 0,
+        "trust_credits": 0
+      },
+      "quote": {
+        "version": "work-price-v1",
+        "tier": 0,
+        "time_lock_iterations": "16",
+        "render_rounds": 1,
+        "issued_at": 1800000000,
+        "expires_at": 1800000120
+      }
+    },
+    {
+      "name": "network_cap",
+      "pressure": {
+        "base_tier": 0,
+        "velocity_tier": 0,
+        "outstanding_tier": 0,
+        "network_tier": 32,
+        "failure_debt": 0,
+        "assurance_debt": 0,
+        "trust_credits": 32
+      },
+      "quote": {
+        "version": "work-price-v1",
+        "tier": 4,
+        "time_lock_iterations": "256",
+        "render_rounds": 16,
+        "issued_at": 1800000000,
+        "expires_at": 1800000136
+      }
+    },
+    {
+      "name": "debt_and_velocity",
+      "pressure": {
+        "base_tier": 1,
+        "velocity_tier": 2,
+        "outstanding_tier": 3,
+        "network_tier": 4,
+        "failure_debt": 9,
+        "assurance_debt": 8,
+        "trust_credits": 12
+      },
+      "quote": {
+        "version": "work-price-v1",
+        "tier": 15,
+        "time_lock_iterations": "524288",
+        "render_rounds": 256,
+        "issued_at": 1800000000,
+        "expires_at": 1800000900
+      }
+    },
+    {
+      "name": "tier_32_lifetime_cap",
+      "pressure": {
+        "base_tier": 32,
+        "velocity_tier": 32,
+        "outstanding_tier": 32,
+        "network_tier": 32,
+        "failure_debt": 32,
+        "assurance_debt": 0,
+        "trust_credits": 0
+      },
+      "quote": {
+        "version": "work-price-v1",
+        "tier": 32,
+        "time_lock_iterations": "68719476736",
+        "render_rounds": 256,
+        "issued_at": 1800000000,
+        "expires_at": 1800086400
+      }
+    }
+  ]
+}

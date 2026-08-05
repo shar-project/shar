@@ -1,0 +1,82 @@
+{
+  "schema": "shar-fallback-assertion-vectors-v1",
+  "now": 1800000000,
+  "request": {
+    "tenant": "tenant",
+    "site_key": "site",
+    "action": "submit",
+    "origin": "https://app.example",
+    "region": "au",
+    "method": "authenticated-session",
+    "assertion_id": "host-assertion-stored-0001",
+    "session_binding": "session-123"
+  },
+  "assertion": {
+    "version": "fallback-assertion-v1",
+    "tenant": "tenant",
+    "site_key": "site",
+    "action": "submit",
+    "origin": "https://app.example",
+    "region": "au",
+    "method": "authenticated-session",
+    "assertion_id": "host-assertion-stored-0001",
+    "session_binding": "session-123",
+    "verified_at": 1799999990,
+    "expires_at": 1800000100
+  },
+  "vectors": [
+    { "name": "valid_exact_binding", "result": "accepted" },
+    { "name": "missing", "missing": true, "result": "rejected" },
+    {
+      "name": "expired",
+      "overrides": { "expires_at": 1799999999 },
+      "result": "rejected"
+    },
+    {
+      "name": "future_dated",
+      "overrides": {
+        "verified_at": 1800000001,
+        "expires_at": 1800000100
+      },
+      "result": "rejected"
+    },
+    {
+      "name": "lifetime_over_five_minutes",
+      "overrides": {
+        "verified_at": 1799999990,
+        "expires_at": 1800000291
+      },
+      "result": "rejected"
+    },
+    {
+      "name": "method_mismatch",
+      "overrides": { "method": "email" },
+      "result": "rejected"
+    },
+    {
+      "name": "tenant_mismatch",
+      "overrides": { "tenant": "other-tenant" },
+      "result": "rejected"
+    },
+    {
+      "name": "region_mismatch",
+      "overrides": { "region": "us" },
+      "result": "rejected"
+    },
+    {
+      "name": "session_mismatch",
+      "overrides": { "session_binding": "session-other" },
+      "result": "rejected"
+    },
+    {
+      "name": "assertion_id_mismatch",
+      "overrides": { "assertion_id": "host-assertion-stored-other" },
+      "result": "rejected"
+    },
+    {
+      "name": "corrupt_version",
+      "overrides": { "version": "fallback-assertion-v0" },
+      "result": "unavailable"
+    }
+  ]
+}

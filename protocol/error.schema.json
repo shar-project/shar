@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shar.dev/schema/v1/error.json",
+  "title": "SharError",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["code", "retryable", "next_action"],
+  "properties": {
+    "code": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+    "retryable": { "type": "boolean" },
+    "next_action": { "enum": ["new_challenge", "retry", "fallback", "none"] },
+    "retry_after": { "type": "integer", "minimum": 0 }
+  }
+}

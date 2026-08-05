@@ -1,0 +1,20 @@
+{
+  "version": "trust-voprf-v1",
+  "suite": "ristretto255-SHA512",
+  "seed": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+  "key_id": "AQIDBA",
+  "input": "dHJ1c3QtdmVjdG9yLWlucHV0",
+  "secret_key": "Ga7lO5tQUVaYTGJb1E70fsZySkw9HVcLGqGcWvZZfgo",
+  "public_key": "Wrtk9NcX4ZSrQG30-r5Jz_m0OkDgIwxZss2i3Bgm-nc",
+  "scoped_public_key": "xiI4whkQKB-TtqJ1ITeanmQQ-kNTfZz01NPhXInixQE",
+  "blind": "NujC38hSqmVS4PLy8oD5cRFGjderasJM3hZfCkbTPw0",
+  "blinded": "XNunxeL3DH5h0HzhWycTfWYLZjctOYVaaalGmw37T2k",
+  "evaluated": "TP-h5lEnLTwThB08yXmLudFe_598OSt-dQRrDAUFtwE",
+  "proof": "5Ym-yzdp5qoj4TyTN9XPuU-jK5ym3yUcN2iblPQO-wfal5235q_wVSj1ePG5w1AkAbpeHuHeSwMfdHpC3tBBDw",
+  "output": "4tyr6QsIkk491-JXgiJxghPGwspgdiyeOrzr7w93_Gi7PgAn10ynuX-MKuqfHx8SWUrAjOEN3M8Xt0PgDeEYrA",
+  "proof_random_scalar": "uOwMiyhPWhM1KEfoE2b_2_iqrJW113sIZTh0fo5Xoww",
+  "trust_input": "c2hhci90cnVzdC9pbnB1dC92MQAABmNyZWRpdAAgISEhISEhISEhISEhISEhISEhISEhISEhISEhISEhISEAIEJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCAAQBAgME",
+  "scoped_trust_input": "c2hhci90cnVzdC9pbnB1dC92MQAABmNyZWRpdAAgAAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8AIEJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCAAQBAgMEAAh0ZW5hbnQtYQAGc2l0ZS1hAAZzaWdudXAAE2h0dHBzOi8vYXBwLmV4YW1wbGU",
+  "credit_challenge_digest": "ML4XC8oLbukj-_NQ0GfYhzk57iv73797xcxH-0OsrzE",
+  "credit_replay_id": "8_LAj66CJVhUCTd3yPMp5tzTgEM3vWM7zNqOiZTa14g"
+}

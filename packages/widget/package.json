@@ -1,0 +1,45 @@
+{
+  "name": "@shar/widget",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shar-project/shar.git",
+    "directory": "packages/widget"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "sideEffects": true,
+  "files": [
+    "dist",
+    "wasm",
+    "README.md"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./trust-credits": {
+      "types": "./dist/trust-credits.d.ts",
+      "import": "./dist/trust-credits.js"
+    },
+    "./locales/*": {
+      "types": "./dist/locales/*.d.ts",
+      "import": "./dist/locales/*.js"
+    },
+    "./timelock.wasm": "./wasm/shar_timelock.wasm"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepack": "npm run build"
+  },
+  "dependencies": {
+    "@shar/server": "0.1.0"
+  }
+}

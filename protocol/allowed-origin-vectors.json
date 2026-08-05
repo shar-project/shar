@@ -1,0 +1,69 @@
+{
+  "version": "allowed-origin-v1",
+  "vectors": [
+    {
+      "name": "canonical-https",
+      "input": "https://app.example",
+      "valid": true,
+      "origins": ["https://app.example"]
+    },
+    {
+      "name": "multiple-canonical-origins",
+      "input": "https://app.example:8443,http://localhost:3000,http://127.0.0.1:3001,http://[::1]:3002",
+      "valid": true,
+      "origins": [
+        "https://app.example:8443",
+        "http://localhost:3000",
+        "http://127.0.0.1:3001",
+        "http://[::1]:3002"
+      ]
+    },
+    { "name": "empty", "input": "", "valid": false },
+    { "name": "wildcard", "input": "*", "valid": false },
+    {
+      "name": "empty-segment",
+      "input": "https://a.example,,https://b.example",
+      "valid": false
+    },
+    {
+      "name": "duplicate",
+      "input": "https://app.example,https://app.example",
+      "valid": false
+    },
+    {
+      "name": "whitespace",
+      "input": "https://app.example, https://other.example",
+      "valid": false
+    },
+    {
+      "name": "path-is-not-an-origin",
+      "input": "https://app.example/path",
+      "valid": false
+    },
+    {
+      "name": "trailing-slash-is-not-canonical",
+      "input": "https://app.example/",
+      "valid": false
+    },
+    {
+      "name": "credentials-are-forbidden",
+      "input": "https://user@app.example",
+      "valid": false
+    },
+    {
+      "name": "non-local-http",
+      "input": "http://app.example",
+      "valid": false
+    },
+    {
+      "name": "default-port-is-not-canonical",
+      "input": "https://app.example:443",
+      "valid": false
+    },
+    {
+      "name": "uppercase-host-is-not-canonical",
+      "input": "https://APP.example",
+      "valid": false
+    }
+  ]
+}

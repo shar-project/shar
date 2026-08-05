@@ -1,0 +1,62 @@
+{
+  "version": "malformed-cbor-v1",
+  "limits": { "maximum_depth": 64, "maximum_items": 4096 },
+  "vectors": [
+    {
+      "name": "empty",
+      "segments": [],
+      "outcome": "reject"
+    },
+    {
+      "name": "noncanonical_integer",
+      "segments": [{ "hex": "1801", "repeat": 1 }],
+      "outcome": "reject"
+    },
+    {
+      "name": "noncanonical_map_order",
+      "segments": [{ "hex": "a202000100", "repeat": 1 }],
+      "outcome": "reject"
+    },
+    {
+      "name": "invalid_utf8",
+      "segments": [{ "hex": "61ff", "repeat": 1 }],
+      "outcome": "reject"
+    },
+    {
+      "name": "unsupported_float",
+      "segments": [{ "hex": "fa00000000", "repeat": 1 }],
+      "outcome": "reject"
+    },
+    {
+      "name": "declared_length_overflow",
+      "segments": [{ "hex": "5bffffffffffffffff", "repeat": 1 }],
+      "outcome": "reject"
+    },
+    {
+      "name": "trailing_item",
+      "segments": [{ "hex": "f6f6", "repeat": 1 }],
+      "outcome": "reject"
+    },
+    {
+      "name": "depth_exhaustion_at_token_body_limit",
+      "segments": [
+        { "hex": "81", "repeat": 11000 },
+        { "hex": "f6", "repeat": 1 }
+      ],
+      "outcome": "reject"
+    },
+    {
+      "name": "item_exhaustion",
+      "segments": [
+        { "hex": "991001", "repeat": 1 },
+        { "hex": "f6", "repeat": 4097 }
+      ],
+      "outcome": "reject"
+    },
+    {
+      "name": "bounded_valid_array",
+      "segments": [{ "hex": "82f5f6", "repeat": 1 }],
+      "outcome": "accept"
+    }
+  ]
+}

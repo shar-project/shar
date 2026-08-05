@@ -1,0 +1,155 @@
+{
+  "schema": "shar-render-browser-calibration-v1",
+  "environment": {
+    "captured_at": "2026-08-05T05:36:37.081Z",
+    "node": "v26.3.0",
+    "v8": "14.6.202.34-node.20",
+    "os": "linux 7.1.4-gentoo-dist-hardened",
+    "arch": "x64",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-1255U",
+    "logical_cpus": 12,
+    "load_average": [1.15, 1.99, 2.91],
+    "host": "#1 SMP PREEMPT_DYNAMIC Tue Jul 21 07:06:44 AEST 2026",
+    "browser": "151.0.7922.34",
+    "gpu_mode": "software renderer",
+    "gpu": {
+      "vendor_id": 65535,
+      "device_id": 65535,
+      "vendor": "Google Inc. (Google)",
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+      "driver_vendor": "SwANGLE",
+      "driver_version": "5.0.0",
+      "display_type": "ANGLE_SWIFTSHADER",
+      "gl_implementation": "(gl=egl-angle,angle=swiftshader)",
+      "hardware_supports_vulkan": false,
+      "feature_status": {
+        "gpu_compositing": "enabled",
+        "rasterization": "enabled",
+        "vulkan": "disabled_off",
+        "webgl": "enabled",
+        "webgpu": "unavailable_software"
+      }
+    }
+  },
+  "method": {
+    "viewport": "1280x720",
+    "browser_mode": "headless",
+    "container_image": null,
+    "repetitions": {
+      "cpu": 5,
+      "webgpu": 5,
+      "webgl2": 5,
+      "css": 1
+    },
+    "timing": "cold executor setup included in every repetition",
+    "caveat": "GPU strings come from the local benchmark runner's privileged CDP session, never from the privacy-mode widget or challenge transcript."
+  },
+  "plan": {
+    "version": "render-v1",
+    "seed": "AwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwM",
+    "rounds": 1,
+    "triangles": 256,
+    "samples": 4096,
+    "predicates_per_round": 1048576
+  },
+  "results": {
+    "cpu": {
+      "name": "cpu",
+      "digest": "9StxwcBu1zEQCx1IGhZFgAM7Feia9oqbjakj5JQx9co",
+      "times": [22.5, 12, 10.5, 9.800000011920929, 10.5],
+      "distribution": {
+        "samples": 5,
+        "min_ms": 9.800000011920929,
+        "median_ms": 10.5,
+        "p95_ms": 22.5,
+        "max_ms": 22.5,
+        "mean_ms": 13.060000002384186
+      }
+    },
+    "webgpu": {
+      "name": "webgpu",
+      "digest": "9StxwcBu1zEQCx1IGhZFgAM7Feia9oqbjakj5JQx9co",
+      "times": [
+        75.90000000596046, 62.099999994039536, 61.5, 70, 71.7000000178814
+      ],
+      "distribution": {
+        "samples": 5,
+        "min_ms": 61.5,
+        "median_ms": 70,
+        "p95_ms": 75.90000000596046,
+        "max_ms": 75.90000000596046,
+        "mean_ms": 68.24000000357628
+      }
+    },
+    "webgl2": {
+      "name": "webgl2",
+      "digest": "9StxwcBu1zEQCx1IGhZFgAM7Feia9oqbjakj5JQx9co",
+      "times": [
+        214.5, 179.40000000596046, 180.69999998807907, 209.09999999403954,
+        195.90000000596046
+      ],
+      "distribution": {
+        "samples": 5,
+        "min_ms": 179.40000000596046,
+        "median_ms": 195.90000000596046,
+        "p95_ms": 214.5,
+        "max_ms": 214.5,
+        "mean_ms": 195.9199999988079
+      }
+    },
+    "css": {
+      "name": "css",
+      "digest": "9StxwcBu1zEQCx1IGhZFgAM7Feia9oqbjakj5JQx9co",
+      "times": [8943.100000023842],
+      "distribution": {
+        "samples": 1,
+        "min_ms": 8943.100000023842,
+        "median_ms": 8943.100000023842,
+        "p95_ms": 8943.100000023842,
+        "max_ms": 8943.100000023842,
+        "mean_ms": 8943.100000023842
+      }
+    }
+  },
+  "console": {
+    "ignored_driver_warnings": 4,
+    "relevant_messages": []
+  },
+  "gates": {
+    "requested_backend": {
+      "requirement": "the observed Chromium GPU process exactly matches the requested physical, SwiftShader, or llvmpipe backend",
+      "requested": "swiftshader",
+      "observed": "swiftshader",
+      "pass": true
+    },
+    "bounded_million_scale": {
+      "requirement": "default round evaluates at least one million predicates",
+      "observed": 1048576,
+      "pass": true
+    },
+    "identical_digest": {
+      "requirement": "every available executor returns the same digest",
+      "observed": ["9StxwcBu1zEQCx1IGhZFgAM7Feia9oqbjakj5JQx9co"],
+      "pass": true
+    },
+    "accelerated_over_css": {
+      "requirement": "fastest accelerated executor is at least 10x CSS-only",
+      "fastest_backend": "webgpu",
+      "observed": 127.75857142891202,
+      "pass": true,
+      "ga_scope_pass": false
+    },
+    "accelerated_latency": {
+      "requirement": "default accelerated median targets 8-16 ms",
+      "fastest_backend": "webgpu",
+      "observed_ms": 70,
+      "provisional_pass": false,
+      "ga_scope_pass": false
+    },
+    "css_completion": {
+      "requirement": "CPU-only CSS execution eventually completes",
+      "observed_ms": 8943.100000023842,
+      "pass": true
+    }
+  }
+}

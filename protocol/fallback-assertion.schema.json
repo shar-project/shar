@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shar.dev/schema/v1/fallback-assertion.json",
+  "title": "Shar stored host fallback assertion v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "tenant",
+    "site_key",
+    "action",
+    "origin",
+    "method",
+    "assertion_id",
+    "verified_at",
+    "expires_at"
+  ],
+  "properties": {
+    "version": { "const": "fallback-assertion-v1" },
+    "tenant": {
+      "$ref": "https://shar.dev/schema/v1/fallback-completion.json#/$defs/request/properties/tenant"
+    },
+    "site_key": {
+      "$ref": "https://shar.dev/schema/v1/fallback-completion.json#/$defs/request/properties/site_key"
+    },
+    "action": {
+      "$ref": "https://shar.dev/schema/v1/fallback-completion.json#/$defs/request/properties/action"
+    },
+    "origin": {
+      "$ref": "https://shar.dev/schema/v1/fallback-completion.json#/$defs/request/properties/origin"
+    },
+    "region": {
+      "$ref": "https://shar.dev/schema/v1/fallback-completion.json#/$defs/request/properties/region"
+    },
+    "method": {
+      "$ref": "https://shar.dev/schema/v1/fallback-completion.json#/$defs/request/properties/method"
+    },
+    "assertion_id": {
+      "$ref": "https://shar.dev/schema/v1/fallback-completion.json#/$defs/request/properties/assertion_id"
+    },
+    "session_binding": {
+      "$ref": "https://shar.dev/schema/v1/fallback-completion.json#/$defs/request/properties/session_binding"
+    },
+    "verified_at": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "expires_at": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    }
+  }
+}

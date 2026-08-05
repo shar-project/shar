@@ -1,0 +1,73 @@
+{
+  "version": "bounded-text-v1",
+  "vectors": [
+    {
+      "name": "tenant-at-128-utf8-bytes",
+      "field": "tenant",
+      "unit": "😀",
+      "repetitions": 32,
+      "valid": true
+    },
+    {
+      "name": "tenant-over-128-utf8-bytes",
+      "field": "tenant",
+      "unit": "😀",
+      "repetitions": 33,
+      "valid": false,
+      "error": "invalid_tenant"
+    },
+    {
+      "name": "region-at-64-utf8-bytes",
+      "field": "region",
+      "unit": "é",
+      "repetitions": 32,
+      "valid": true
+    },
+    {
+      "name": "region-over-64-utf8-bytes",
+      "field": "region",
+      "unit": "é",
+      "repetitions": 33,
+      "valid": false,
+      "error": "invalid_region"
+    },
+    {
+      "name": "session-at-256-utf8-bytes",
+      "field": "session_binding",
+      "unit": "😀",
+      "repetitions": 64,
+      "valid": true
+    },
+    {
+      "name": "session-over-256-utf8-bytes",
+      "field": "session_binding",
+      "unit": "😀",
+      "repetitions": 65,
+      "valid": false,
+      "error": "invalid_session_binding"
+    },
+    {
+      "name": "network-at-128-utf8-bytes",
+      "field": "network_pseudonym",
+      "unit": "é",
+      "repetitions": 64,
+      "valid": true
+    },
+    {
+      "name": "network-over-128-utf8-bytes",
+      "field": "network_pseudonym",
+      "unit": "é",
+      "repetitions": 65,
+      "valid": false,
+      "error": "invalid_network_pseudonym"
+    },
+    {
+      "name": "unicode-control-is-rejected",
+      "field": "action",
+      "unit": "",
+      "repetitions": 1,
+      "valid": false,
+      "error": "invalid_action"
+    }
+  ]
+}

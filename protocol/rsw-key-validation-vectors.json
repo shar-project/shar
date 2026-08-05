@@ -1,0 +1,35 @@
+{
+  "version": "rsw-key-validation-v1",
+  "vectors": [
+    {
+      "name": "carmichael-trapdoor",
+      "modulus": "1000036000099",
+      "lambda": "166672333344",
+      "valid": true
+    },
+    {
+      "name": "valid-group-exponent-multiple",
+      "modulus": "1000036000099",
+      "lambda": "333344666688",
+      "valid": true
+    },
+    {
+      "name": "corrupted-trapdoor",
+      "modulus": "1000036000099",
+      "lambda": "166672333345",
+      "valid": false
+    },
+    {
+      "name": "even-modulus",
+      "modulus": "1000036000098",
+      "lambda": "166672333344",
+      "valid": false
+    },
+    {
+      "name": "out-of-range-trapdoor",
+      "modulus": "1000036000099",
+      "lambda": "1000036000099",
+      "valid": false
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+services:
+  shar:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile.rust
+    environment:
+      SHAR_ALLOWED_ORIGINS: ${SHAR_ALLOWED_ORIGINS:?set an exact comma-separated origin list}
+      SHAR_KEY_FILE: /run/secrets/shar_keys.json
+      SHAR_TRUSTED_PROXY_CIDRS: ${SHAR_TRUSTED_PROXY_CIDRS:-}
+      SHAR_ASSURANCE_MODE: ${SHAR_ASSURANCE_MODE:-off}
+      SHAR_REQUEST_LOG: "1"
+      SHAR_MAX_CONCURRENT_REQUESTS: ${SHAR_MAX_CONCURRENT_REQUESTS:-256}
+      SHAR_STATE_TIMEOUT_MS: ${SHAR_STATE_TIMEOUT_MS:-5000}
+      SHAR_REQUEST_BODY_TIMEOUT_MS: ${SHAR_REQUEST_BODY_TIMEOUT_MS:-15000}
+      SHAR_SHUTDOWN_TIMEOUT_MS: ${SHAR_SHUTDOWN_TIMEOUT_MS:-25000}
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - shar-data:/data
+    secrets:
+      - source: shar_keys
+        target: shar_keys.json
+        uid: "10001"
+        gid: "10001"
+        mode: 0400
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    stop_grace_period: 30s
+    restart: unless-stopped
+
+secrets:
+  shar_keys:
+    file: ${SHAR_KEY_FILE:?point to a mode-0600 key bundle}
+
+volumes:
+  shar-data: {}

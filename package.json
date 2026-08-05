@@ -1,0 +1,60 @@
+{
+  "name": "shar",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shar-project/shar.git"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@vitejs/plugin-react": "^6.0.5",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "prettier": "^3.9.6",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "typescript": "6.0.3",
+    "vite": "^8.2.0"
+  },
+  "scripts": {
+    "build": "npm run build --workspace=@shar/server && npm run build --workspace=@shar/widget && npm run build --workspace=@shar/cap-compat && npm run build:admin && tsc -p tsconfig.json",
+    "build:admin": "tsc -p admin/tsconfig.json && vite build --config admin/vite.config.ts",
+    "format:check": "prettier --check .github admin bench docs deploy/docker/compose.yaml deploy/observability deploy/kubernetes packages/*/src packages/*/package.json packages/*/README.md protocol scripts standalone/js test README.md RELEASING.md SECURITY.md package.json package-lock.json playwright.config.mjs tsconfig.json",
+    "check:deployments": "node scripts/check-deployments.mjs",
+    "check:base-images": "node scripts/check-base-images.mjs",
+    "check:workflows": "node scripts/check-workflows.mjs",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "test:interop": "npm run build && node test/interop.mjs",
+    "test:standalone-interop": "bash test/standalone-interop.sh",
+    "test:standalone-external-interop": "bash test/standalone-external-interop.sh",
+    "test:stores:live": "npm run build && node test/live-stores.mjs",
+    "test:browser": "npm run build && playwright test",
+    "test:browser:physical": "npm run build && node scripts/test-browser-physical.mjs",
+    "test:browser:container": "npm run build && bash scripts/test-browser-container.sh",
+    "bench:cap:prepare": "node bench/cap/prepare.mjs",
+    "bench:cap:bytes": "npm run build && node bench/cap/artifact-bytes.mjs",
+    "bench:cap:browser-bytes": "npm run build && node bench/cap/browser-cold-path.mjs",
+    "bench:cap:core-reference": "node bench/cap/core-reference-server.mjs",
+    "bench:cap:economics": "node bench/cap/economics.mjs",
+    "bench:cap:live": "npm run build && node bench/cap/live.mjs",
+    "bench:cap:standalones": "node bench/cap/standalone-local.mjs",
+    "bench:cap:behavior": "node bench/cap/behavior-matrix.mjs",
+    "bench:render:browser": "npm run build && node bench/render/browser-calibration.mjs",
+    "bench:render:llvmpipe": "npm run build && bash scripts/bench-render-llvmpipe.sh",
+    "bench:timelock": "npm run build --workspace=@shar/server && node bench/timelock/solver-calibration.mjs",
+    "site-secret": "node standalone/js/site-secret.mjs",
+    "keygen:js": "node standalone/js/keygen.mjs"
+  },
+  "dependencies": {
+    "pg": "^8.22.0",
+    "redis": "^6.1.0"
+  }
+}

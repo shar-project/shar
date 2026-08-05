@@ -1,0 +1,29 @@
+{
+  "version": "standalone-listen-v1",
+  "valid": [
+    { "input": "127.0.0.1:8080", "host": "127.0.0.1", "port": 8080 },
+    { "input": "localhost:1", "host": "localhost", "port": 1 },
+    { "input": "0.0.0.0:9180", "host": "0.0.0.0", "port": 9180 },
+    { "input": "[::1]:443", "host": "::1", "port": 443 },
+    { "input": "[::]:9181", "host": "::", "port": 9181 },
+    {
+      "input": "[2001:db8::1]:65535",
+      "host": "2001:db8::1",
+      "port": 65535
+    }
+  ],
+  "invalid": [
+    "",
+    "localhost",
+    ":8080",
+    "::1:8080",
+    "[::1]8080",
+    "[::1]:",
+    "[::1]:-1",
+    "[::1]:0",
+    "[::1]:65536",
+    "localhost:01",
+    "localhost:80.0",
+    "localhost:port"
+  ]
+}
