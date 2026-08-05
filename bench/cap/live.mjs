@@ -167,7 +167,11 @@ async function jsonRequest(url, init, accepted = [200]) {
   }
   if (!accepted.includes(response.status)) {
     const error = new Error(`${url.pathname} returned ${response.status}`);
-    error.result = { status: response.status, body, elapsed_ms: elapsed };
+    error.result = {
+      status: response.status,
+      body,
+      elapsed_ms: response.elapsed_ms,
+    };
     throw error;
   }
   return {

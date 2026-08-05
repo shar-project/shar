@@ -316,6 +316,10 @@ test("live benchmark refuses to manufacture unavailable GA evidence", async () =
   assert.match(source, /keepAlive: true/);
   assert.match(source, /maxSockets: concurrency/);
   assert.match(source, /response\.bytes\.byteLength/);
+  assert.match(
+    source,
+    /error\.result = \{[\s\S]*?elapsed_ms: response\.elapsed_ms/,
+  );
   assert.match(source, /latency is request start through response headers/);
   assert.match(source, /sharMetricSnapshot/);
   assert.match(source, /mean_engine_ms/);
