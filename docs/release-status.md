@@ -662,6 +662,24 @@ high/critical scans are wired before any release job receives registry or OIDC
 authority. Docker itself and the protected multi-architecture release workflow
 remain unverified; the local Podman build and scan covered only `linux/amd64`.
 
+## Public repository security evidence
+
+The repository became public on 2026-08-05 only after a checksum-verified
+Gitleaks 8.30.1 scan covered all 17 commits reachable through the main, review,
+and Dependabot refs. Its four alerts were reviewed as intentional fixtures: one
+published deterministic VOPRF test-vector scalar and three synthetic `shr1_`
+browser-test tokens. Separate scans of pull-request bodies, reviews, comments,
+issues, and commit comments found no secrets. A manual pattern pass also found
+no private infrastructure address, ADB pairing detail, SSH endpoint, local home
+path, private key, or provider credential in the tree or its three authored
+commits.
+
+GitHub provider secret scanning, push protection, vulnerability alerts,
+Dependabot security updates, and private vulnerability reporting are enabled.
+GitHub reports non-provider pattern scanning and validity checks as disabled for
+this repository, so the one-time generic full-history scan is publication
+evidence rather than a substitute for a future continuous generic-secret gate.
+
 ## Open release blockers
 
 The authoritative incomplete list is in `roadmap.md`. Current rendering
