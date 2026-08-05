@@ -227,8 +227,12 @@ connection, header, slow-client, and volumetric limits at the TLS proxy as an
 independent outer boundary.
 
 The Rust HTTP server runs synchronous cryptography and SQLite/PostgreSQL/Redis
-operations on Tokio's blocking workers rather than request workers. The same
-aggregate admission cap bounds submitted protocol work, while readiness allows
+operations on Tokio's blocking workers rather than request workers. Its
+blocking-state admission is the smaller of the aggregate request cap and 64,
+so an allowed 32-request burst can queue behind a ten-connection durable-store
+pool without creating an unbounded blocking-worker backlog. Saturation or the
+configured state deadline returns the same retryable operational error and
+keeps its permit until the blocking operation actually exits. Readiness allows
 only one dependency probe in flight so a hung store cannot accumulate probe
 tasks. The JavaScript PostgreSQL and Redis adapters use their runtime's async
 clients. Node's built-in SQLite adapter is synchronous and remains appropriate
