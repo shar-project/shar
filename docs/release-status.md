@@ -541,15 +541,18 @@ On x86_64 with Rust/Cargo 1.94.0 and Node 26.3.0:
   workflow's pinned engine found no high/critical vulnerability with an
   available fix in either amd64 image. Complete upstream-unfixed findings
   remain visible rather than being described as clean. The workflow now builds
-  both amd64 and arm64 inputs as explicit Docker archives and scans all four
-  image/platform pairs before the publication job receives credentials. A
+  both amd64 and arm64 inputs as explicit Docker archives on matching native
+  GitHub-hosted runners and scans all four image/platform pairs before the
+  publication job receives credentials. Each image/platform pair has a distinct
+  GitHub Actions cache scope, avoiding the backend's default cross-matrix cache
+  overwrite. A
   registry-backed contract checks that every digest is an OCI index with both
   required Linux architectures. This caught and replaced three initially
   selected amd64 child-manifest digests: the corrected local arm64 attempt now
   pulls an actual arm64 Node binary and stops at the expected missing host
   emulation boundary instead of silently producing relabeled x64 output. Local
-  QEMU execution, Docker/BuildKit-specific behavior, completed
-  multi-architecture output, and registry publication remain open.
+  The QEMU-backed publication build, completed multi-architecture output, and
+  registry publication remain open.
   The protected release now extracts BuildKit's attached SPDX document for
   each published platform, rather than asking a second scanner to interpret an
   ambiguous multi-architecture index. Both documents and their shared checksum
