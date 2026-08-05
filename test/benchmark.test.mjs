@@ -371,6 +371,7 @@ test("isolated standalone benchmark fails closed around server evidence", async 
   assert.match(isolated, /ssh_target_was_non_loopback: true/);
   assert.match(isolated, /authenticated_remote_rss: true/);
   assert.match(isolated, /host_controller_sha256/);
+  assert.match(isolated, /admin_index_sha256/);
   assert.match(isolated, /server-host artifact digest differs/);
   assert.match(
     isolated,

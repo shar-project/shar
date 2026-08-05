@@ -23,6 +23,7 @@ const javascriptServer = resolve(
   root,
   config.javascript_server ?? "standalone/js/server.mjs",
 );
+const adminIndex = resolve(root, "dist/admin/index.html");
 const bun = config.bun ?? "bun";
 const node = config.node ?? process.execPath;
 const temporary = await mkdtemp(join(tmpdir(), "shar-cap-host-"));
@@ -104,6 +105,7 @@ try {
         config.variant === "rust" ? rustServer : javascriptServer,
       ),
       cap_entry_sha256: await sha256File(join(capDirectory, "src/index.js")),
+      admin_index_sha256: await sha256File(adminIndex),
     },
     endpoints: {
       shar: `http://127.0.0.1:${config.shar_port}`,
@@ -209,6 +211,7 @@ function requireInputs() {
     join(capDirectory, "src/index.js"),
     join(capDirectory, "node_modules"),
     keygen,
+    adminIndex,
     config.variant === "rust" ? rustServer : javascriptServer,
   ]) {
     if (!existsSync(path))

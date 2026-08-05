@@ -28,6 +28,7 @@ required=(
   bench/cap/standalone-host.mjs
   target/release/shar-server
   target/release/shar-keygen
+  dist/admin/index.html
   .bench/cap/source/standalone/standalone/src/index.js
   .bench/cap/source/standalone/standalone/node_modules
 )
@@ -56,6 +57,7 @@ inputs=(
   bench/cap/standalone-host.mjs
   target/release/shar-server
   target/release/shar-keygen
+  dist/admin
   .bench/cap/source/standalone/standalone
 )
 if [[ $stage_javascript == 1 ]]; then

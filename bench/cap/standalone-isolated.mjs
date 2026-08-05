@@ -78,6 +78,7 @@ const expectedArtifacts = {
   cap_entry_sha256: await sha256File(
     resolve(root, ".bench/cap/source/standalone/standalone/src/index.js"),
   ),
+  admin_index_sha256: await sha256File(resolve(root, "dist/admin/index.html")),
   ...(variantsRequested.includes("rust")
     ? {
         rust_server_sha256: await sha256File(
@@ -268,6 +269,8 @@ function validateHostManifest(value, variant) {
     value.artifacts?.host_controller_sha256 !==
       expectedArtifacts.host_controller_sha256 ||
     value.artifacts?.cap_entry_sha256 !== expectedArtifacts.cap_entry_sha256 ||
+    value.artifacts?.admin_index_sha256 !==
+      expectedArtifacts.admin_index_sha256 ||
     (variant === "rust" &&
       value.artifacts?.shar_server_sha256 !==
         expectedArtifacts.rust_server_sha256)
