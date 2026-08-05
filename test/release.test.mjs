@@ -40,9 +40,10 @@ test("external store interop enables assurance only behind loopback trust", asyn
   );
   assert.equal(
     script.match(/SHAR_TRUSTED_PROXY_CIDRS=127\.0\.0\.1\/32/g)?.length,
-    2,
+    1,
   );
-  assert.equal(script.match(/SHAR_ASSURANCE_MODE=trusted-header/g)?.length, 2);
+  assert.equal(script.match(/SHAR_ASSURANCE_MODE=trusted-header/g)?.length, 1);
+  assert.equal(script.match(/"\$\{common_environment\[@\]\}"/g)?.length, 2);
 });
 
 test("container publication waits for npm publication", async () => {

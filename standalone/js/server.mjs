@@ -2,6 +2,7 @@ import { createServer } from "node:http";
 import process from "node:process";
 import { readFileSync, statSync } from "node:fs";
 import { extname } from "node:path";
+import { checkServerIdentity } from "node:tls";
 import {
   PostgresStore,
   RedisStore,
@@ -38,6 +39,13 @@ function startupFailure(error) {
 }
 process.once("uncaughtException", startupFailure);
 process.once("unhandledRejection", startupFailure);
+
+function tlsVerificationHost(url) {
+  const hostname = url.hostname;
+  return hostname.startsWith("[") && hostname.endsWith("]")
+    ? hostname.slice(1, -1)
+    : hostname;
+}
 
 function loadKeyFile() {
   const path = process.env.SHAR_KEY_FILE;
@@ -487,11 +495,23 @@ if (process.env.SHAR_POSTGRES_URL) {
     );
   const ssl = plaintextPostgres
     ? false
-    : { rejectUnauthorized: true, minVersion: "TLSv1.2" };
+    : {
+        rejectUnauthorized: true,
+        minVersion: "TLSv1.2",
+        checkServerIdentity: (_host, certificate) =>
+          checkServerIdentity(tlsVerificationHost(postgresUrl), certificate),
+      };
   if (ssl && process.env.SHAR_POSTGRES_CA_FILE)
     ssl.ca = readFileSync(process.env.SHAR_POSTGRES_CA_FILE, "utf8");
+  // pg-connection-string otherwise replaces the explicit verified TLS object
+  // when any URL-level SSL option is present. Parse sslmode as policy above,
+  // then remove every connection-string TLS override before constructing the
+  // pool so the CA, hostname verification, and minimum version cannot be
+  // silently discarded.
+  for (const parameter of ["sslmode", "sslcert", "sslkey", "sslrootcert"])
+    postgresUrl.searchParams.delete(parameter);
   const pool = new Pool({
-    connectionString: process.env.SHAR_POSTGRES_URL,
+    connectionString: postgresUrl.href,
     max: 10,
     ssl,
     connectionTimeoutMillis: stateTimeoutMilliseconds,
@@ -529,14 +549,25 @@ if (process.env.SHAR_REDIS_URL) {
     throw new Error(
       "SHAR_REDIS_URL must use rediss outside insecure development",
     );
+  if (process.env.SHAR_REDIS_CA_FILE && redisUrl.protocol !== "rediss:")
+    throw new Error("SHAR_REDIS_CA_FILE requires a rediss SHAR_REDIS_URL");
   const { createClient } = await import("redis");
+  const redisSocket = {
+    connectTimeout: stateTimeoutMilliseconds,
+    reconnectStrategy: (retries) =>
+      Math.min(50 * 2 ** Math.min(retries, 5), 1_000),
+  };
+  if (redisUrl.protocol === "rediss:") {
+    redisSocket.rejectUnauthorized = true;
+    redisSocket.minVersion = "TLSv1.2";
+    redisSocket.checkServerIdentity = (_host, certificate) =>
+      checkServerIdentity(tlsVerificationHost(redisUrl), certificate);
+    if (process.env.SHAR_REDIS_CA_FILE)
+      redisSocket.ca = readFileSync(process.env.SHAR_REDIS_CA_FILE, "utf8");
+  }
   const redis = createClient({
     url: redisUrl.href,
-    socket: {
-      connectTimeout: stateTimeoutMilliseconds,
-      reconnectStrategy: (retries) =>
-        Math.min(50 * 2 ** Math.min(retries, 5), 1_000),
-    },
+    socket: redisSocket,
     commandOptions: { timeout: stateTimeoutMilliseconds },
     disableOfflineQueue: true,
   });

@@ -100,12 +100,17 @@ spec:
                 secretKeyRef:
                   name: shar-state
                   key: redis-url
+            - name: SHAR_REDIS_CA_FILE
+              value: /run/secrets/redis/ca.pem
           volumeMounts:
             - name: shar-keys
               mountPath: /run/secrets/shar
               readOnly: true
             - name: postgres-ca
               mountPath: /run/secrets/postgres
+              readOnly: true
+            - name: redis-ca
+              mountPath: /run/secrets/redis
               readOnly: true
             - name: tmp
               mountPath: /tmp
@@ -160,6 +165,12 @@ spec:
             secretName: shar-postgres-ca
             # The CA certificate is public material and must be readable by
             # the non-root process; private database credentials stay in env.
+            defaultMode: 0444
+        - name: redis-ca
+          secret:
+            secretName: shar-redis-ca
+            # Trust anchors are public material; the Redis password remains in
+            # the URL stored by shar-state rather than in this volume.
             defaultMode: 0444
         - name: tmp
           emptyDir:

@@ -312,7 +312,9 @@ On x86_64 with Rust/Cargo 1.94.0 and Node 26.3.0:
   inclusive expiry second. Both adapters reject a one-second marker at the
   JavaScript/Redis exact-integer ceiling. Lua deadline arithmetic is rejected
   before a timestamp can exceed its exact IEEE-754 integer range; non-TLS Redis is
-  allowed only in explicit insecure-development mode. Atomic quote pricing and
+  allowed only in explicit insecure-development mode. Both standalones verify
+  Redis hostnames over TLS and accept a private CA bundle through
+  `SHAR_REDIS_CA_FILE`. Atomic quote pricing and
   reservation use one five-key script; the servers precompute all 33 finite,
   overflow-checked expiries and the script selects the exact quoted tier.
   Redis audit persistence now groups the bounded worker batch by privacy-safe

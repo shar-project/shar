@@ -14,8 +14,9 @@ Before applying the manifest:
    overwrites the documented numeric assurance header; never forward a
    browser-supplied value.
 3. Create `shar-keys` from a mode-0600 production key bundle, `shar-state`
-   with `postgres-url` and `redis-url` entries, and `shar-postgres-ca` with a
-   `ca.pem` entry. Use `rediss://` and certificate-verified PostgreSQL.
+   with `postgres-url` and `redis-url` entries, and the `shar-postgres-ca` and
+   `shar-redis-ca` secrets with `ca.pem` entries. Use `rediss://` and
+   certificate-verified PostgreSQL.
 4. Run the live-store race, failover, reconnect, and partition tests against
    the exact managed services and proxies used by the cluster.
 
@@ -28,6 +29,7 @@ kubectl create secret generic shar-state \
   --from-literal=postgres-url='postgresql://shar:REDACTED@db.example/shar?sslmode=require' \
   --from-literal=redis-url='rediss://:REDACTED@redis.example:6379'
 kubectl create secret generic shar-postgres-ca --from-file=ca.pem=./ca.pem
+kubectl create secret generic shar-redis-ca --from-file=ca.pem=./redis-ca.pem
 kubectl apply -f deploy/kubernetes/deployment.yaml
 ```
 

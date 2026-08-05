@@ -26,7 +26,7 @@ use shar_core::{
 };
 use shar_server::{
     postgres::PostgresStore,
-    redis::{RedisStore, low_latency_client},
+    redis::{RedisStore, low_latency_client_with_ca},
     sqlite::SqliteStore,
 };
 #[cfg(unix)]
@@ -662,13 +662,22 @@ fn load_stores(policy: WorkPolicy, state_timeout: Duration) -> StoreSet {
         (store.clone(), store.clone(), store.clone(), store)
     };
     if let Ok(url) = env::var("SHAR_REDIS_URL") {
-        if !url.starts_with("rediss://")
-            && env::var("SHAR_INSECURE_DEVELOPMENT").as_deref() != Ok("1")
-        {
+        let redis_tls = url.starts_with("rediss://");
+        if !redis_tls && env::var("SHAR_INSECURE_DEVELOPMENT").as_deref() != Ok("1") {
             eprintln!("SHAR_REDIS_URL must use rediss outside insecure development");
             std::process::exit(78)
         }
-        let client = low_latency_client(&url).unwrap_or_else(|error| {
+        let redis_ca = env::var("SHAR_REDIS_CA_FILE").ok().map(|path| {
+            if !redis_tls {
+                eprintln!("SHAR_REDIS_CA_FILE requires a rediss SHAR_REDIS_URL");
+                std::process::exit(78)
+            }
+            std::fs::read(&path).unwrap_or_else(|error| {
+                eprintln!("cannot read SHAR_REDIS_CA_FILE {path}: {error}");
+                std::process::exit(78)
+            })
+        });
+        let client = low_latency_client_with_ca(&url, redis_ca).unwrap_or_else(|error| {
             eprintln!("invalid SHAR_REDIS_URL: {error}");
             std::process::exit(78)
         });

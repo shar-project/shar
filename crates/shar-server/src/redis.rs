@@ -1,6 +1,6 @@
 use base64::{Engine as _, engine::general_purpose::URL_SAFE_NO_PAD};
 use redis::{
-    Client, Connection, FromRedisValue, IntoConnectionInfo, RedisError, Script,
+    Client, Connection, FromRedisValue, IntoConnectionInfo, RedisError, Script, TlsCertificates,
     io::tcp::TcpSettings,
 };
 use sha2::{Digest, Sha256};
@@ -44,10 +44,26 @@ const LUA_MAX_INTEGER: u64 = 9_007_199_254_740_991;
 /// request/response command on the quote-critical path, so every pooled TCP
 /// connection must disable that coalescing delay.
 pub fn low_latency_client(url: &str) -> Result<Client, RedisError> {
+    low_latency_client_with_ca(url, None)
+}
+
+pub fn low_latency_client_with_ca(
+    url: &str,
+    root_certificate: Option<Vec<u8>>,
+) -> Result<Client, RedisError> {
     let connection = url
         .into_connection_info()?
         .set_tcp_settings(TcpSettings::default().set_nodelay(true));
-    Client::open(connection)
+    match root_certificate {
+        Some(root_cert) => Client::build_with_tls(
+            connection,
+            TlsCertificates {
+                client_tls: None,
+                root_cert: Some(root_cert),
+            },
+        ),
+        None => Client::open(connection),
+    }
 }
 
 fn configured_connection(client: &Client, timeout: Duration) -> Result<Connection, StoreError> {

@@ -8,6 +8,10 @@ postgres_url_rust=${SHAR_TEST_POSTGRES_URL_RUST:-$SHAR_TEST_POSTGRES_URL}
 postgres_url_javascript=${SHAR_TEST_POSTGRES_URL_JAVASCRIPT:-$SHAR_TEST_POSTGRES_URL}
 redis_url_rust=${SHAR_TEST_REDIS_URL_RUST:-$SHAR_TEST_REDIS_URL}
 redis_url_javascript=${SHAR_TEST_REDIS_URL_JAVASCRIPT:-$SHAR_TEST_REDIS_URL}
+postgres_ca_file=${SHAR_TEST_POSTGRES_CA_FILE:-}
+redis_ca_file=${SHAR_TEST_REDIS_CA_FILE:-}
+insecure_development=${SHAR_TEST_INSECURE_DEVELOPMENT:-1}
+skip_build=${SHAR_TEST_SKIP_BUILD:-0}
 
 workspace=$(cd "$(dirname "$0")/.." && pwd)
 test_directory=$(mktemp -d /tmp/shar-external-interop.XXXXXX)
@@ -59,34 +63,40 @@ stop_servers() {
 }
 
 start_servers() {
+  local common_environment=(
+    SHAR_KEY_FILE="$test_directory/keys.json"
+    SHAR_ALLOWED_ORIGINS=http://localhost:3000
+    SHAR_TRUSTED_PROXY_CIDRS=127.0.0.1/32
+    SHAR_ASSURANCE_MODE=trusted-header
+    SHAR_ADMIN_ASSETS="$workspace/dist/admin"
+    SHAR_REQUEST_LOG=0
+    SHAR_MAX_CONCURRENT_REQUESTS=1
+    SHAR_STATE_TIMEOUT_MS=2000
+  )
+  if [[ "$insecure_development" == 1 ]]; then
+    common_environment+=(SHAR_INSECURE_DEVELOPMENT=1)
+  elif [[ "$insecure_development" != 0 ]]; then
+    echo "SHAR_TEST_INSECURE_DEVELOPMENT must be 0 or 1" >&2
+    return 2
+  fi
+  if [[ -n "$postgres_ca_file" ]]; then
+    common_environment+=(SHAR_POSTGRES_CA_FILE="$postgres_ca_file")
+  fi
+  if [[ -n "$redis_ca_file" ]]; then
+    common_environment+=(SHAR_REDIS_CA_FILE="$redis_ca_file")
+  fi
   env \
-    SHAR_INSECURE_DEVELOPMENT=1 \
-    SHAR_KEY_FILE="$test_directory/keys.json" \
-    SHAR_ALLOWED_ORIGINS=http://localhost:3000 \
-    SHAR_TRUSTED_PROXY_CIDRS=127.0.0.1/32 \
-    SHAR_ASSURANCE_MODE=trusted-header \
+    "${common_environment[@]}" \
     SHAR_POSTGRES_URL="$postgres_url_rust" \
     SHAR_REDIS_URL="$redis_url_rust" \
     SHAR_LISTEN=127.0.0.1:4388 \
-    SHAR_ADMIN_ASSETS="$workspace/dist/admin" \
-    SHAR_REQUEST_LOG=0 \
-    SHAR_MAX_CONCURRENT_REQUESTS=1 \
-    SHAR_STATE_TIMEOUT_MS=2000 \
     target/release/shar-server >>"$test_directory/rust.log" 2>&1 &
   rust_pid=$!
   env \
-    SHAR_INSECURE_DEVELOPMENT=1 \
-    SHAR_KEY_FILE="$test_directory/keys.json" \
-    SHAR_ALLOWED_ORIGINS=http://localhost:3000 \
-    SHAR_TRUSTED_PROXY_CIDRS=127.0.0.1/32 \
-    SHAR_ASSURANCE_MODE=trusted-header \
+    "${common_environment[@]}" \
     SHAR_POSTGRES_URL="$postgres_url_javascript" \
     SHAR_REDIS_URL="$redis_url_javascript" \
     SHAR_LISTEN=127.0.0.1:4389 \
-    SHAR_ADMIN_ASSETS="$workspace/dist/admin" \
-    SHAR_REQUEST_LOG=0 \
-    SHAR_MAX_CONCURRENT_REQUESTS=1 \
-    SHAR_STATE_TIMEOUT_MS=2000 \
     node standalone/js/server.mjs >>"$test_directory/javascript.log" 2>&1 &
   javascript_pid=$!
   wait_for_server http://127.0.0.1:4388 "$rust_pid" "$test_directory/rust.log"
@@ -95,8 +105,13 @@ start_servers() {
 
 trap cleanup EXIT
 cd "$workspace"
-npm run build
-cargo build --locked --release --bin shar-server --bin shar-keygen
+if [[ "$skip_build" == 0 ]]; then
+  npm run build
+  cargo build --locked --release --bin shar-server --bin shar-keygen
+elif [[ "$skip_build" != 1 ]]; then
+  echo "SHAR_TEST_SKIP_BUILD must be 0 or 1" >&2
+  exit 2
+fi
 target/release/shar-keygen --output "$test_directory/keys.json"
 
 start_servers

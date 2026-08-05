@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import { randomBytes } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { checkServerIdentity } from "node:tls";
 import {
   PostgresStore,
   RedisStore,
@@ -10,6 +12,13 @@ const postgresUrl = process.env.SHAR_TEST_POSTGRES_URL;
 const redisUrl = process.env.SHAR_TEST_REDIS_URL;
 if (!postgresUrl && !redisUrl)
   throw new Error("set SHAR_TEST_POSTGRES_URL and/or SHAR_TEST_REDIS_URL");
+
+function tlsVerificationHost(url) {
+  const hostname = url.hostname;
+  return hostname.startsWith("[") && hostname.endsWith("]")
+    ? hostname.slice(1, -1)
+    : hostname;
+}
 
 function fixture(label) {
   return {
@@ -126,11 +135,34 @@ async function exercise(name, store, value, previous) {
 
 if (postgresUrl) {
   const { Pool } = await import("pg");
+  const postgresConnectionUrl = new URL(postgresUrl);
   const ssl =
     process.env.SHAR_TEST_POSTGRES_TLS === "0"
       ? false
-      : { rejectUnauthorized: true, minVersion: "TLSv1.2" };
-  const options = { connectionString: postgresUrl, max: 10, ssl };
+      : {
+          rejectUnauthorized: true,
+          minVersion: "TLSv1.2",
+          checkServerIdentity: (_host, certificate) =>
+            checkServerIdentity(
+              tlsVerificationHost(postgresConnectionUrl),
+              certificate,
+            ),
+          ...(process.env.SHAR_TEST_POSTGRES_CA_FILE
+            ? {
+                ca: readFileSync(
+                  process.env.SHAR_TEST_POSTGRES_CA_FILE,
+                  "utf8",
+                ),
+              }
+            : {}),
+        };
+  for (const parameter of ["sslmode", "sslcert", "sslkey", "sslrootcert"])
+    postgresConnectionUrl.searchParams.delete(parameter);
+  const options = {
+    connectionString: postgresConnectionUrl.href,
+    max: 10,
+    ssl,
+  };
   let pool = new Pool(options);
   const values = [];
   try {
@@ -161,7 +193,23 @@ if (postgresUrl) {
 
 if (redisUrl) {
   const { createClient } = await import("redis");
-  let client = createClient({ url: redisUrl });
+  const socket = redisUrl.startsWith("rediss://")
+    ? {
+        rejectUnauthorized: true,
+        minVersion: "TLSv1.2",
+        checkServerIdentity: (_host, certificate) =>
+          checkServerIdentity(
+            tlsVerificationHost(new URL(redisUrl)),
+            certificate,
+          ),
+        ...(process.env.SHAR_TEST_REDIS_CA_FILE
+          ? {
+              ca: readFileSync(process.env.SHAR_TEST_REDIS_CA_FILE, "utf8"),
+            }
+          : {}),
+      }
+    : undefined;
+  let client = createClient({ url: redisUrl, socket });
   client.on("error", (error) =>
     console.error(`Redis test connection error: ${error.message}`),
   );
@@ -171,7 +219,7 @@ if (redisUrl) {
     const store = new RedisStore(client);
     values.push(await exercise("Redis", store, fixture("redis")));
     await client.close();
-    client = createClient({ url: redisUrl });
+    client = createClient({ url: redisUrl, socket });
     client.on("error", (error) =>
       console.error(`Redis reconnect error: ${error.message}`),
     );

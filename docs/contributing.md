@@ -47,7 +47,9 @@ cargo clippy --workspace --locked --all-targets -- -D warnings
 - **Standalone transport:** run `npm run test:standalone-interop`.
 - **PostgreSQL or Redis:** run `npm run test:stores:live`,
   `npm run test:standalone-external-interop`, and
-  `npm run test:standalone-store-partition` against disposable services.
+  `npm run test:standalone-store-partition` against disposable services. Run
+  `npm run test:standalone-store-tls` for the self-contained private-CA TLS and
+  refusal matrix (Podman or Docker and OpenSSL are required).
 - **Containers or workflows:** run `npm run check:deployments`,
   `npm run check:base-images`, and `npm run check:workflows`.
 - **Cap comparison:** use the relevant command in the
