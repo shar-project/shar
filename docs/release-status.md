@@ -1,5 +1,10 @@
 # Release status
 
+> This is the detailed maintainer evidence ledger, not an onboarding guide.
+> Start with the [documentation index](index.md) or [quickstart](quickstart.md).
+> The concise authoritative list of incomplete GA work is
+> [roadmap.md](roadmap.md).
+
 Last updated: 2026-08-05. This is implementation evidence, not a GA claim.
 
 GitHub's public-repository configuration now has an active semantic release-tag

@@ -1,5 +1,9 @@
 # Operations
 
+This is the production reference. For a first local run, use the
+[quickstart](quickstart.md); for component and trust-boundary context, read the
+[architecture overview](architecture.md).
+
 Shar's Rust and pure-JavaScript standalone servers use the same protocol,
 configuration bundle, SQLite schema, and PostgreSQL state model. They may be
 run interchangeably on a single host against one SQLite WAL database. SQLite
