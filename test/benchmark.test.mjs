@@ -298,6 +298,7 @@ test("live benchmark refuses to manufacture unavailable GA evidence", async () =
   assert.match(source, /SHAR_BENCH_ENDPOINT/);
   assert.match(source, /CAP_BENCH_SETTINGS_JSON/);
   assert.match(source, /SHAR_BENCH_RSS_INTERVAL_MS/);
+  assert.match(source, /SHAR_BENCH_RSS_REQUEST_TIMEOUT_MS/);
   assert.match(source, /_RSS_URL/);
   assert.match(source, /SHAR_BENCH_RSS_TOKEN/);
   assert.match(source, /remote_control/);

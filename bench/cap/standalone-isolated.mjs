@@ -194,6 +194,7 @@ async function benchmarkPair(variant, repetition) {
         SHAR_BENCH_CLIENT_WORKERS: String(clientWorkers),
         SHAR_BENCH_ACTION_CARDINALITY: String(actionCardinality),
         SHAR_BENCH_RSS_INTERVAL_MS: String(rssIntervalMs),
+        SHAR_BENCH_RSS_REQUEST_TIMEOUT_MS: "10000",
         SHAR_BENCH_RSS_URL: `http://127.0.0.1:${localPorts.control}/rss/shar`,
         CAP_BENCH_RSS_URL: `http://127.0.0.1:${localPorts.control}/rss/cap`,
         SHAR_BENCH_RSS_TOKEN: token,

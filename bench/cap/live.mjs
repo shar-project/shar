@@ -37,6 +37,12 @@ const clientWorkers = integer(
   Math.min(16, concurrency),
 );
 const rssIntervalMs = integer("SHAR_BENCH_RSS_INTERVAL_MS", 50, 10, 1000);
+const rssRequestTimeoutMs = integer(
+  "SHAR_BENCH_RSS_REQUEST_TIMEOUT_MS",
+  10_000,
+  1_000,
+  30_000,
+);
 const rssSources = Object.fromEntries(
   ["SHAR_BENCH_PID", "CAP_BENCH_PID"].map((pidName) => [
     pidName,
@@ -329,7 +335,9 @@ async function rss(pidName) {
   }
   const response = await fetch(source.url, {
     headers: { authorization: `Bearer ${source.token}` },
-    signal: AbortSignal.timeout(2_000),
+    signal: AbortSignal.timeout(rssRequestTimeoutMs),
+  }).catch((cause) => {
+    throw new Error(`${pidName} RSS controller request failed`, { cause });
   });
   if (!response.ok)
     throw new Error(`${pidName} RSS controller returned ${response.status}`);
@@ -624,6 +632,7 @@ const result = {
       "recorded Node worker pool with fixed total concurrency and per-worker HTTP/1.1 keep-alive agents; latency is request start through response headers",
     shar_action_cardinality: actionCardinality,
     rss_interval_ms: rssIntervalMs,
+    rss_request_timeout_ms: rssRequestTimeoutMs,
     rss_sources: Object.fromEntries(
       Object.entries(rssSources)
         .filter(([, source]) => source)
