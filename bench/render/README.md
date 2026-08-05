@@ -42,6 +42,9 @@ Retained local evidence:
 - `results/local-amd-steam-deck-calibration.json`: observed physical AMD Van
   Gogh through the Steam Deck's Flatpak Chromium and RADV/ANGLE Vulkan, driven
   over loopback-only SSH tunnels.
+- `results/local-android-mali-g710-calibration.json`: observed physical Arm
+  Mali-G710 through Chrome on a Pixel 7 Pro, driven through temporary ADB CDP
+  and reverse-loopback forwards.
 
 These artifacts cover multiple local and remote hosts but only a small device
 and browser sample. They do not substitute for the remaining vendor, mobile,

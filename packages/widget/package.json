@@ -37,7 +37,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "prepack": "npm run build"
+    "prepack": "npm run build --workspace=@shar/server && npm run build"
   },
   "dependencies": {
     "@shar/server": "0.1.0"

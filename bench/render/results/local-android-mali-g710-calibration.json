@@ -1,0 +1,169 @@
+{
+  "schema": "shar-render-browser-calibration-v1",
+  "environment": {
+    "platform": "Android 17 (API 37, 2026-07-05 patch)",
+    "machine": "Google Pixel 7 Pro",
+    "soc": "Google Tensor G2 GS201",
+    "physical_gpu": "Arm Mali-G710 class",
+    "display": "1440x3120 at 560 dpi",
+    "memory_mib": 11468,
+    "coordinator": {
+      "captured_at": "2026-08-05T10:32:51.272Z",
+      "node": "v26.3.0",
+      "v8": "14.6.202.34-node.20",
+      "os": "linux 7.1.5-gentoo-dist-hardened",
+      "arch": "x64",
+      "cpu": "12th Gen Intel(R) Core(TM) i7-1255U",
+      "logical_cpus": 12,
+      "load_average": [0.86, 1.36, 1.38],
+      "host": "#1 SMP PREEMPT_DYNAMIC Mon Aug  3 17:55:56 AEST 2026"
+    },
+    "browser": "150.0.7871.186",
+    "browser_transport": "remote-cdp",
+    "gpu_mode": "physical hardware",
+    "gpu": {
+      "vendor_id": 5045,
+      "device_id": 2824994816,
+      "vendor": "Google Inc. (ARM)",
+      "renderer": "ANGLE (ARM, Mali-G710, OpenGL ES 3.2 v1.r54p3-00eac0.1848e3b066182d5bb5a345ab256f13ee)",
+      "driver_vendor": "ARM",
+      "driver_version": "54.3.00eac0",
+      "display_type": "ANGLE_OPENGLES",
+      "gl_implementation": "(gl=egl-angle,angle=opengles)",
+      "hardware_supports_vulkan": true,
+      "feature_status": {
+        "gpu_compositing": "enabled",
+        "rasterization": "enabled",
+        "vulkan": "enabled_on",
+        "webgl": "enabled",
+        "webgpu": "enabled"
+      }
+    }
+  },
+  "method": {
+    "viewport": "1280x720",
+    "browser_mode": "headed",
+    "page_transport": "adb-reverse",
+    "container_image": null,
+    "repetitions": {
+      "cpu": 5,
+      "webgpu": 5,
+      "webgl2": 5,
+      "css": 1
+    },
+    "timing": "cold executor setup included in every repetition",
+    "caveat": "GPU strings come from a benchmark-only privileged CDP session, never from the privacy-mode widget or challenge transcript."
+  },
+  "plan": {
+    "version": "render-v1",
+    "seed": "AwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwM",
+    "rounds": 1,
+    "triangles": 256,
+    "samples": 4096,
+    "predicates_per_round": 1048576
+  },
+  "results": {
+    "cpu": {
+      "name": "cpu",
+      "digest": "9StxwcBu1zEQCx1IGhZFgAM7Feia9oqbjakj5JQx9co",
+      "times": [
+        59.30000001192093, 30.399999976158142, 21.30000001192093,
+        17.19999998807907, 17
+      ],
+      "distribution": {
+        "samples": 5,
+        "min_ms": 17,
+        "median_ms": 21.30000001192093,
+        "p95_ms": 59.30000001192093,
+        "max_ms": 59.30000001192093,
+        "mean_ms": 29.039999997615816
+      }
+    },
+    "webgpu": {
+      "name": "webgpu",
+      "digest": "9StxwcBu1zEQCx1IGhZFgAM7Feia9oqbjakj5JQx9co",
+      "times": [
+        175.80000001192093, 34.5, 39.69999998807907, 40.80000001192093,
+        33.39999997615814
+      ],
+      "distribution": {
+        "samples": 5,
+        "min_ms": 33.39999997615814,
+        "median_ms": 39.69999998807907,
+        "p95_ms": 175.80000001192093,
+        "max_ms": 175.80000001192093,
+        "mean_ms": 64.83999999761582
+      }
+    },
+    "webgl2": {
+      "name": "webgl2",
+      "digest": "9StxwcBu1zEQCx1IGhZFgAM7Feia9oqbjakj5JQx9co",
+      "times": [
+        122.19999998807907, 35.5, 48.60000002384186, 66.30000001192093,
+        72.19999998807907
+      ],
+      "distribution": {
+        "samples": 5,
+        "min_ms": 35.5,
+        "median_ms": 66.30000001192093,
+        "p95_ms": 122.19999998807907,
+        "max_ms": 122.19999998807907,
+        "mean_ms": 68.96000000238419
+      }
+    },
+    "css": {
+      "name": "css",
+      "digest": "9StxwcBu1zEQCx1IGhZFgAM7Feia9oqbjakj5JQx9co",
+      "times": [12110.300000011921],
+      "distribution": {
+        "samples": 1,
+        "min_ms": 12110.300000011921,
+        "median_ms": 12110.300000011921,
+        "p95_ms": 12110.300000011921,
+        "max_ms": 12110.300000011921,
+        "mean_ms": 12110.300000011921
+      }
+    }
+  },
+  "console": {
+    "ignored_driver_warnings": 0,
+    "relevant_messages": []
+  },
+  "gates": {
+    "requested_backend": {
+      "requirement": "the observed Chromium GPU process exactly matches the requested physical, SwiftShader, or llvmpipe backend",
+      "requested": "physical",
+      "observed": "physical",
+      "pass": true
+    },
+    "bounded_million_scale": {
+      "requirement": "default round evaluates at least one million predicates",
+      "observed": 1048576,
+      "pass": true
+    },
+    "identical_digest": {
+      "requirement": "every available executor returns the same digest",
+      "observed": ["9StxwcBu1zEQCx1IGhZFgAM7Feia9oqbjakj5JQx9co"],
+      "pass": true
+    },
+    "accelerated_over_css": {
+      "requirement": "fastest accelerated executor is at least 10x CSS-only",
+      "fastest_backend": "webgpu",
+      "observed": 305.0453401422757,
+      "pass": true,
+      "ga_scope_pass": true
+    },
+    "accelerated_latency": {
+      "requirement": "default accelerated median targets 8-16 ms",
+      "fastest_backend": "webgpu",
+      "observed_ms": 39.69999998807907,
+      "provisional_pass": false,
+      "ga_scope_pass": false
+    },
+    "css_completion": {
+      "requirement": "CPU-only CSS execution eventually completes",
+      "observed_ms": 12110.300000011921,
+      "pass": true
+    }
+  }
+}

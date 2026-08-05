@@ -49,8 +49,10 @@ function requireContainerGate(name, text) {
     /docker\/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130/,
   );
   assert.match(security, /platforms: linux\/\$\{\{ matrix\.arch \}\}/);
-  assert.match(security, /outputs: type=oci,dest=/);
-  assert.match(security, /image: oci-archive:/);
+  assert.match(security, /outputs: type=docker,dest=/);
+  assert.match(security, /image: docker-archive:/);
+  assert.match(security, /provenance: false/);
+  assert.doesNotMatch(security, /type=oci|oci-archive:/);
   assert.match(security, /push: false/);
   assert.doesNotMatch(security, /load: true|Build the host-platform image/);
   assert.match(security, /fail-build: true/);
@@ -86,7 +88,7 @@ function requireContainerGate(name, text) {
     assert.match(preflight, /npm pack --workspaces --pack-destination release/);
     assert.match(
       preflight,
-      /cd release && sha256sum \*\.tgz \*\.cdx\.json > SHA256SUMS/,
+      /cd release && sha256sum \.\/\*\.tgz \.\/\*\.cdx\.json > SHA256SUMS/,
     );
     assert.match(
       preflight,
@@ -142,6 +144,11 @@ requirePinnedActions("CI", ci);
 requirePinnedActions("release", release);
 requireContainerGate("CI", ci);
 requireContainerGate("release", release);
+assert.match(
+  ci,
+  /^on:\n  push:\n    branches: \[main\]\n  pull_request:\n/m,
+  "CI must run feature branches through pull_request only to avoid duplicate matrices",
+);
 assert.match(job(ci, "packages"), /npm run check:base-images/);
 assert.match(job(release, "preflight"), /npm run check:base-images/);
 const packages = job(ci, "packages");
@@ -176,16 +183,13 @@ assert.match(
   /rustup toolchain install 1\.94\.0 --profile minimal --component rustfmt --component clippy --target wasm32-unknown-unknown/,
 );
 assert.match(rust, /scripts\/build-widget-wasm\.sh --check/);
-assert.match(
-  rust,
-  /rustsec\/audit-check@69366f33c96575abad1ee0dba8212993eecbe998/,
-);
+assert.match(rust, /cargo install cargo-audit --version 0\.22\.2 --locked/);
+assert.match(rust, /run: cargo audit/);
 assert.match(
   durableStores,
   /cargo test --locked -p shar-server postgres::tests::terminated_client_is_not_retried_and_the_next_request_reconnects -- --ignored --exact/,
 );
-assert.match(rust, /token: \$\{\{ secrets\.GITHUB_TOKEN \}\}/);
-assert.match(rust, /checks: write/);
+assert.doesNotMatch(rust, /GITHUB_TOKEN|checks: write/);
 assert.match(
   rust,
   /cargo test --locked -p shar-server redis::tests::failed_connection_is_not_retried_and_the_next_request_reconnects -- --ignored --exact/,

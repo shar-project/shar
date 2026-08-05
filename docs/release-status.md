@@ -176,8 +176,14 @@ On x86_64 with Rust/Cargo 1.94.0 and Node 26.3.0:
   CSS completion with the same digest, an 870× separation. Backend,
   bounded-work, digest, CSS-completion, and 10× gates pass; the device honestly
   misses the aspirational 8–16 ms latency band by 1 ms. All software artifacts
-  remain non-GA-scoped, and the full reference-device matrix is still a GA
-  gate;
+  remain non-GA-scoped. A headed Android Chrome 150 run on a physical Pixel 7
+  Pro then verified Arm Mali-G710 (`13b5`) and its r54p3 driver through CDP.
+  CPU, WebGPU, WebGL2, and CSS produced the same digest; five full-setup samples
+  measured a 39.7 ms WebGPU median, 66.3 ms WebGL2 median, and 12.11 s CSS
+  completion, a 305× separation. Correctness and speedup gates pass while the
+  mobile device honestly misses the 8–16 ms latency band. The temporary ADB
+  mappings and test tabs were removed after capture. The full reference-device
+  matrix is still a GA gate;
 - the reproducible pure-JavaScript time-lock calibration uses a retained public
   modulus from a generated 2048-bit RSW semiprime, without retaining or
   distributing its trapdoor. Five 100,000-iteration samples measured a local
@@ -190,18 +196,20 @@ On x86_64 with Rust/Cargo 1.94.0 and Node 26.3.0:
   tarball installation and compiled-entry smoke tests pass, including the
   widget's exported WASM subpath and binary. Widget pause/resume, fallback,
   cleanup, and Cap hidden-token/event contracts pass in Chromium;
-- `@shar/widget` now includes an explicitly opt-in 68,831-byte Rust/WASM
+- `@shar/widget` now includes an explicitly opt-in 68,751-byte Rust/WASM
   sequential-squaring accelerator while preserving pure JavaScript `BigInt` as
   the universal/default path. Each call is bounded to 65,536 iterations and a
   512-byte integer, reuses the exact signed plan, checkpoints only at the same
   chunk boundary, and restores the pre-chunk value before JavaScript fallback.
   The artifact SHA-256 is
-  `bf27c58d78885cb6b80d38fae2a605c18b1130b25d3fcc62fdc5c55f5058e4ce`.
-  Local Rust 1.94.0 `wasm32-unknown-unknown` rebuilds are byte-identical; CI and
-  tagged-release preflight now rebuild and compare the committed binary before
-  packaging. Node tests cover ABI bounds, digest, output identity, and an
-  unavailable WebAssembly runtime. The default browser cold path and the
-  pure-TypeScript server remain WASM-free;
+  `abfe1fde6d133526abe811ecd19cdc251e7595f5910cdad46d21800b2f20cde8`.
+  Rust 1.94.0 `wasm32-unknown-unknown` rebuilds remap the repository and Cargo
+  registry to canonical paths before code generation, preventing dependency
+  panic locations from making the binary host-specific. CI and tagged-release
+  preflight rebuild and compare the committed binary before packaging. Node
+  tests cover ABI bounds, digest, output identity, and an unavailable
+  WebAssembly runtime. The default browser cold path and the pure-TypeScript
+  server remain WASM-free;
 - `@shar/widget` now exports separate reCAPTCHA- and hCaptcha-shaped browser
   adapters. Browser coverage proves rendered and invisible/v3-style execution,
   conventional response field names, callbacks, response/reset/removal state,
@@ -656,12 +664,30 @@ high/critical scans are wired before any release job receives registry or OIDC
 authority. Docker itself and the protected multi-architecture release workflow
 remain unverified; the local Podman build and scan covered only `linux/amd64`.
 
+## Public repository security evidence
+
+The repository became public on 2026-08-05 only after a checksum-verified
+Gitleaks 8.30.1 scan covered all 17 commits reachable through the main, review,
+and Dependabot refs. Its four alerts were reviewed as intentional fixtures: one
+published deterministic VOPRF test-vector scalar and three synthetic `shr1_`
+browser-test tokens. Separate scans of pull-request bodies, reviews, comments,
+issues, and commit comments found no secrets. A manual pattern pass also found
+no private infrastructure address, ADB pairing detail, SSH endpoint, local home
+path, private key, or provider credential in the tree or its three authored
+commits.
+
+GitHub provider secret scanning, push protection, vulnerability alerts,
+Dependabot security updates, and private vulnerability reporting are enabled.
+GitHub reports non-provider pattern scanning and validity checks as disabled for
+this repository, so the one-time generic full-history scan is publication
+evidence rather than a substitute for a future continuous generic-secret gate.
+
 ## Open release blockers
 
 The authoritative incomplete list is in `roadmap.md`. Current rendering
 evidence covers three desktop engine families, SwiftShader, Mesa llvmpipe, one
 physical Intel Iris Xe, and one physical AMD Van Gogh Steam Deck, but not the
-required NVIDIA, Apple, Adreno, Mali, mobile, and shipping-browser version
+required NVIDIA, Apple, Adreno, wider mobile, and shipping-browser version
 matrix. PostgreSQL
 and Redis have no multi-host/failover test in
 this environment (the single-service race now passes), and the external RFC

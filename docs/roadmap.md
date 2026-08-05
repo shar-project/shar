@@ -4,9 +4,9 @@ The following are deliberately not represented as complete:
 
 - freeze `render-v1` after byte-identical WebGPU, WebGL2, and real CSS-engine
   trials on the remaining physical GPU and mobile matrix; retained local
-  and remote evidence now covers Intel Iris Xe, AMD Van Gogh, SwiftShader,
-  Mesa llvmpipe, and a GPU-disabled browser without treating software fallback
-  as hardware;
+  and remote evidence now covers Intel Iris Xe, AMD Van Gogh, Arm Mali-G710,
+  SwiftShader, Mesa llvmpipe, and a GPU-disabled browser without treating
+  software fallback as hardware;
 - independent review of production 2048-bit key generation and verification;
 - live multi-host, failover, and network-partition validation of the dual
   PostgreSQL and Redis-compatible atomic adapters;

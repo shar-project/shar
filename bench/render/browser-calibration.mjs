@@ -135,6 +135,7 @@ let browserVersion;
 let gpu;
 let measurements;
 let consoleMessages;
+let page;
 try {
   browserVersion = browser.version();
   const cdp = await browser.newBrowserCDPSession();
@@ -142,7 +143,7 @@ try {
   const remoteContext = cdpEndpoint ? browser.contexts()[0] : undefined;
   if (cdpEndpoint && !remoteContext)
     throw new Error("remote CDP browser has no default context");
-  const page = remoteContext
+  page = remoteContext
     ? await remoteContext.newPage()
     : await browser.newPage({ viewport: { width: 1280, height: 720 } });
   if (remoteContext) await page.setViewportSize({ width: 1280, height: 720 });
@@ -202,6 +203,7 @@ try {
     return { plan, results };
   });
 } finally {
+  await page?.close().catch(() => undefined);
   await browser.close();
   await new Promise((resolvePromise) => server.close(resolvePromise));
 }

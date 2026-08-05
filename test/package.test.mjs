@@ -52,6 +52,31 @@ test("published package entry points target compiled JavaScript with declaration
   }
 });
 
+test("package prepack scripts build internal workspace dependencies first", async () => {
+  const manifests = Object.fromEntries(
+    await Promise.all(
+      packageNames.map(async (name) => [
+        name,
+        JSON.parse(
+          await readFile(
+            new URL(`../packages/${name}/package.json`, import.meta.url),
+            "utf8",
+          ),
+        ),
+      ]),
+    ),
+  );
+  assert.equal(manifests.server.scripts.prepack, "npm run build");
+  assert.equal(
+    manifests.widget.scripts.prepack,
+    "npm run build --workspace=@shar/server && npm run build",
+  );
+  assert.equal(
+    manifests["cap-compat"].scripts.prepack,
+    "npm run build --workspace=@shar/server && npm run build --workspace=@shar/widget && npm run build",
+  );
+});
+
 test("widget package exports the reproducible optional time-lock accelerator", async () => {
   const directory = new URL("../packages/widget/", import.meta.url);
   const manifest = JSON.parse(
