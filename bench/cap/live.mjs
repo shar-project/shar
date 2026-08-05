@@ -37,6 +37,12 @@ const clientWorkers = integer(
   Math.min(16, concurrency),
 );
 const rssIntervalMs = integer("SHAR_BENCH_RSS_INTERVAL_MS", 50, 10, 1000);
+const rssSources = Object.fromEntries(
+  ["SHAR_BENCH_PID", "CAP_BENCH_PID"].map((pidName) => [
+    pidName,
+    rssSource(pidName),
+  ]),
+);
 const runId = randomUUID();
 const pinned = await manifest();
 const httpAgent = new HttpAgent({
@@ -82,6 +88,32 @@ function integer(name, fallback, min, max) {
   if (!Number.isSafeInteger(value) || value < min || value > max)
     throw new Error(`${name} must be ${min}..${max}`);
   return value;
+}
+function rssSource(pidName) {
+  const pid = process.env[pidName];
+  const urlName = pidName.replace(/_PID$/, "_RSS_URL");
+  const urlText = process.env[urlName];
+  if (pid && urlText)
+    throw new Error(`${pidName} and ${urlName} are mutually exclusive`);
+  if (pid) {
+    if (
+      !/^\d+$/.test(pid) ||
+      Number(pid) < 1 ||
+      !Number.isSafeInteger(Number(pid))
+    )
+      throw new Error(`${pidName} must be a positive integer PID`);
+    return { type: "local_procfs", pid: Number(pid) };
+  }
+  if (!urlText) return undefined;
+  const url = new URL(urlText);
+  if (!/^https?:$/.test(url.protocol))
+    throw new Error(`${urlName} must use HTTP(S)`);
+  const token = process.env.SHAR_BENCH_RSS_TOKEN;
+  if (!token || token.length < 32)
+    throw new Error(
+      `SHAR_BENCH_RSS_TOKEN must contain at least 32 characters when ${urlName} is set`,
+    );
+  return { type: "remote_control", url, token };
 }
 async function jsonRequest(url, init, accepted = [200]) {
   const started = performance.now();
@@ -287,18 +319,24 @@ async function solveShar(challenge) {
 }
 
 async function rss(pidName) {
-  const pid = process.env[pidName];
-  if (!pid) return null;
-  if (
-    !/^\d+$/.test(pid) ||
-    Number(pid) < 1 ||
-    !Number.isSafeInteger(Number(pid))
-  )
-    throw new Error(`${pidName} must be a positive integer PID`);
-  const status = await readFile(`/proc/${Number(pid)}/status`, "utf8");
-  const match = /^VmRSS:\s+(\d+)\s+kB$/m.exec(status);
-  if (!match) throw new Error(`cannot read RSS for ${pidName}=${pid}`);
-  return Number(match[1]) * 1024;
+  const source = rssSources[pidName];
+  if (!source) return null;
+  if (source.type === "local_procfs") {
+    const status = await readFile(`/proc/${source.pid}/status`, "utf8");
+    const match = /^VmRSS:\s+(\d+)\s+kB$/m.exec(status);
+    if (!match) throw new Error(`cannot read RSS for ${pidName}=${source.pid}`);
+    return Number(match[1]) * 1024;
+  }
+  const response = await fetch(source.url, {
+    headers: { authorization: `Bearer ${source.token}` },
+    signal: AbortSignal.timeout(2_000),
+  });
+  if (!response.ok)
+    throw new Error(`${pidName} RSS controller returned ${response.status}`);
+  const body = await response.json();
+  if (!Number.isSafeInteger(body?.rss_bytes) || body.rss_bytes <= 0)
+    throw new Error(`${pidName} RSS controller returned invalid evidence`);
+  return body.rss_bytes;
 }
 
 async function sharMetricSnapshot() {
@@ -344,7 +382,7 @@ async function measureRss(pidName, operation) {
   let samplingError;
   const started = performance.now();
   const sample = () => {
-    if (!process.env[pidName]) return Promise.resolve();
+    if (!rssSources[pidName]) return Promise.resolve();
     if (inFlight) return inFlight;
     inFlight = (async () => {
       try {
@@ -360,7 +398,7 @@ async function measureRss(pidName, operation) {
     return inFlight;
   };
   await sample();
-  const timer = process.env[pidName]
+  const timer = rssSources[pidName]
     ? setInterval(() => void sample(), rssIntervalMs)
     : undefined;
   let value;
@@ -586,12 +624,20 @@ const result = {
       "recorded Node worker pool with fixed total concurrency and per-worker HTTP/1.1 keep-alive agents; latency is request start through response headers",
     shar_action_cardinality: actionCardinality,
     rss_interval_ms: rssIntervalMs,
+    rss_sources: Object.fromEntries(
+      Object.entries(rssSources)
+        .filter(([, source]) => source)
+        .map(([name, source]) => [name, source.type]),
+    ),
   },
   warnings: [
     "Node CPU reference solve times are not accelerated-browser or energy evidence.",
     "Live endpoint throughput includes loopback/network and configured storage latency.",
     `Shar issuance uses ${actionCardinality} action scope(s); set SHAR_BENCH_ACTION_CARDINALITY=${issueOperations} for the high-cardinality abuse profile.`,
-    "RSS samples use Linux /proc VmRSS and are reference-process evidence, not a stabilized container memory limit or a multi-host benchmark.",
+    rssSources.SHAR_BENCH_PID?.type === "remote_control" &&
+    rssSources.CAP_BENCH_PID?.type === "remote_control"
+      ? "RSS samples come from the authenticated server-host controller; the enclosing isolated harness must validate server identity and stabilized idle memory."
+      : "RSS samples use local Linux /proc VmRSS and are reference-process evidence, not a stabilized container memory limit or a multi-host benchmark.",
     ...(capSettings.instrumentation === true
       ? [
           "Cap redemption omitted: instrumentation must execute in the browser harness.",

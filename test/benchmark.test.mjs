@@ -298,6 +298,9 @@ test("live benchmark refuses to manufacture unavailable GA evidence", async () =
   assert.match(source, /SHAR_BENCH_ENDPOINT/);
   assert.match(source, /CAP_BENCH_SETTINGS_JSON/);
   assert.match(source, /SHAR_BENCH_RSS_INTERVAL_MS/);
+  assert.match(source, /_RSS_URL/);
+  assert.match(source, /SHAR_BENCH_RSS_TOKEN/);
+  assert.match(source, /remote_control/);
   assert.match(source, /SHAR_BENCH_ACTION_CARDINALITY/);
   assert.match(source, /SHAR_BENCH_CLIENT_WORKERS/);
   assert.match(source, /rssSummary/);
@@ -339,6 +342,49 @@ test("standalone benchmark publishes only complete paired runs", async () => {
   assert.match(source, /SHAR_BENCH_CLIENT_WORKERS/);
   assert.match(source, /CAP_BENCH_PROTOCOL/);
   assert.match(source, /rsw: capSettings\.rsw/);
+});
+
+test("isolated standalone benchmark fails closed around server evidence", async () => {
+  const isolated = await readFile(
+    new URL("../bench/cap/standalone-isolated.mjs", import.meta.url),
+    "utf8",
+  );
+  const host = await readFile(
+    new URL("../bench/cap/standalone-host.mjs", import.meta.url),
+    "utf8",
+  );
+  const staging = await readFile(
+    new URL("../scripts/stage-cap-isolated.sh", import.meta.url),
+    "utf8",
+  );
+  const packageDocument = await json("package.json");
+
+  assert.equal(
+    packageDocument.scripts["bench:cap:isolated"],
+    "node bench/cap/standalone-isolated.mjs",
+  );
+  assert.equal(
+    packageDocument.scripts["bench:cap:stage-isolated"],
+    "bash scripts/stage-cap-isolated.sh",
+  );
+  assert.match(isolated, /ExitOnForwardFailure=yes/);
+  assert.match(isolated, /ssh_target_was_non_loopback: true/);
+  assert.match(isolated, /authenticated_remote_rss: true/);
+  assert.match(isolated, /host_controller_sha256/);
+  assert.match(isolated, /server-host artifact digest differs/);
+  assert.match(
+    isolated,
+    /isolated benchmark requires a clean committed worktree/,
+  );
+  assert.match(isolated, /stagedOutputDirectory/);
+  assert.match(isolated, /await rename\(temporaryPath, path\)/);
+  assert.match(host, /listen\(port, "127\.0\.0\.1"/);
+  assert.match(host, /timingSafeEqual/);
+  assert.match(host, /\/proc\/\$\{child\.pid\}\/status/);
+  assert.match(host, /controller_authentication: "bearer_token"/);
+  assert.match(staging, /\/tmp\/shar-cap-stage-/);
+  assert.match(staging, /remote staging directory already exists/);
+  assert.doesNotMatch(staging, /rsync[^\n]*--delete/);
 });
 
 test("native issuance profiler retains an in-process Euclidean derivation baseline", async () => {

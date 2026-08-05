@@ -99,6 +99,55 @@ isolated machine. These results remain `local_reference_only`: they exclude
 Redis memory, container-runtime overhead, managed-store latency, browser solve
 energy, and the required multi-host deployment matrix.
 
+## Isolated server comparison
+
+The isolated harness moves Cap and Shar to a separate Linux server while the
+load generator stays on the current machine. Cap, Shar, and the authenticated
+RSS controller bind only to the server's loopback interface. The harness opens
+three SSH local forwards, verifies the staged controller and server artifact
+digests, stabilizes idle RSS on the server, samples server `/proc` during each
+issuance phase, and publishes nothing unless every paired run is complete.
+
+Prepare Cap and build the release binaries on the load-generator checkout,
+then stage a clean committed revision into a fresh, narrow temporary directory:
+
+```sh
+npm run bench:cap:prepare -- --install-core
+npm run build
+cargo build --locked --release --bin shar-server --bin shar-keygen
+
+export SHAR_BENCH_SSH_TARGET=benchmark-server.example
+export SHAR_BENCH_REMOTE_ROOT=/tmp/shar-cap-stage-$(git rev-parse --short HEAD)
+npm run bench:cap:stage-isolated
+```
+
+The server needs a Redis-compatible service reachable from the server process;
+`redis://127.0.0.1:6379` means server-host loopback, not load-host loopback. No
+system install is required by the harness. Start or provision that service
+separately, then run the pinned RSW profile:
+
+```sh
+CAP_BENCH_REDIS_URL=redis://127.0.0.1:6379 \
+SHAR_BENCH_REMOTE_BUN="$SHAR_BENCH_REMOTE_ROOT/.bench/bin/bun" \
+npm run bench:cap:isolated
+```
+
+The default isolated run is the GA native-server gate: three fresh Rust/Cap
+pairs, 3,000 issuance operations per product, concurrency 32, eight load
+workers, and Cap RSW at 75,000 iterations. Set
+`SHAR_BENCH_STAGE_JAVASCRIPT=1` while staging and
+`SHAR_BENCH_VARIANTS=rust,javascript` while running to add the production
+JavaScript server. Both machines must keep the chosen local and remote
+three-port ranges free; change their first ports with
+`SHAR_BENCH_LOCAL_PORT` and `SHAR_BENCH_REMOTE_PORT` if needed.
+
+Results are written under `results/rsw/isolated/`. They record both machine
+environments without retaining the private SSH target or controller bearer
+token. SSH forwarding overhead affects both products. Redis and SSH process
+memory are excluded, although server-local Redis contention is not. The result
+therefore remains separate from browser latency, device energy, managed-store
+failover, and attacker-economics evidence.
+
 ## Cap behavior matrix
 
 The throughput profile defaults to the historical SHA setting and can run the
