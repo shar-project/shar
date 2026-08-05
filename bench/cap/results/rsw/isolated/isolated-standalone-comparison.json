@@ -1,0 +1,142 @@
+{
+  "schema": "shar-cap-isolated-standalone-comparison-v1",
+  "captured_at": "2026-08-05T16:44:47.237Z",
+  "revision": "83434b883d88ccbb86502db84e8c8b39a9acc4bc",
+  "scope": {
+    "status": "isolated_latency_constrained",
+    "cap": "standalone@3.1.8",
+    "shar_variants": ["rust"],
+    "topology": "load generator and server processes execute on separate non-loopback SSH hosts; all service and control listeners remain loopback-only and traverse authenticated SSH forwards",
+    "memory": "server-host Linux /proc VmRSS after stabilization and during issuance; Redis and SSH process memory excluded",
+    "exclusions": [
+      "Redis and SSH process memory",
+      "container runtime overhead",
+      "managed-store and proxy failover",
+      "browser latency and energy",
+      "attacker economics"
+    ]
+  },
+  "inputs": {
+    "repetitions": 3,
+    "issue_operations": 3000,
+    "concurrency": 32,
+    "http_client_workers": 8,
+    "shar_action_cardinality": 1,
+    "shar_state": "redis",
+    "solve_samples": 1,
+    "rss_interval_ms": 100,
+    "cap_settings": {
+      "challengeCount": 80,
+      "saltSize": 32,
+      "difficulty": 4,
+      "instrumentation": false,
+      "rsw": true,
+      "rswT": 75000
+    }
+  },
+  "variants": {
+    "rust": {
+      "repetitions": 3,
+      "shar_issuance_ops_per_second": {
+        "samples": 3,
+        "min": 184.86129721489877,
+        "median": 208.01677526821376,
+        "p95": 216.95793758062757,
+        "max": 216.95793758062757,
+        "mean": 203.2786700212467
+      },
+      "cap_issuance_ops_per_second": {
+        "samples": 3,
+        "min": 139.71737221342985,
+        "median": 146.76556144075428,
+        "p95": 146.87548173107868,
+        "max": 146.87548173107868,
+        "mean": 144.45280512842092
+      },
+      "shar_idle_rss_bytes": {
+        "samples": 3,
+        "min": 11698176,
+        "median": 11993088,
+        "p95": 12046336,
+        "max": 12046336,
+        "mean": 11912533.333333334
+      },
+      "cap_idle_rss_bytes": {
+        "samples": 3,
+        "min": 164831232,
+        "median": 166068224,
+        "p95": 166215680,
+        "max": 166215680,
+        "mean": 165705045.33333334
+      },
+      "per_run_throughput_ratio": {
+        "samples": 3,
+        "min": 1.2586259805661106,
+        "median": 1.478261899118672,
+        "p95": 1.4888397339054653,
+        "max": 1.4888397339054653,
+        "mean": 1.4085758711967493
+      },
+      "per_run_idle_rss_ratio": {
+        "samples": 3,
+        "min": 0.07037949728930508,
+        "median": 0.07253847671665352,
+        "p95": 0.07275980319069629,
+        "max": 0.07275980319069629,
+        "mean": 0.07189259239888496
+      },
+      "quality": {
+        "issuance_relative_standard_deviation": {
+          "shar": 0.06653396189312473,
+          "cap": 0.023182363312726766
+        },
+        "idle_rss_relative_standard_deviation": {
+          "shar": 0.012854061088961906,
+          "cap": 0.003746445494929447
+        }
+      }
+    }
+  },
+  "topology_quality": {
+    "request_floor_ms": {
+      "samples": 3,
+      "min": 14.512595000000147,
+      "median": 19.517980000000534,
+      "p95": 19.98574599999847,
+      "max": 19.98574599999847,
+      "mean": 18.005440333333052
+    },
+    "request_floor_at_most_5ms": {
+      "threshold": 5,
+      "direction": "maximum",
+      "status": "fail",
+      "pass": false,
+      "observed_min": 14.512595000000147,
+      "observed_median": 19.517980000000534,
+      "observed_max": 19.98574599999847
+    },
+    "reason": "a higher floor lets transport latency dominate both products and cannot establish the native server-throughput gate"
+  },
+  "native_thresholds": {
+    "throughput_at_least_2x_cap": {
+      "threshold": 2,
+      "direction": "minimum",
+      "status": "fail",
+      "pass": false,
+      "observed_min": 1.2586259805661106,
+      "observed_median": 1.478261899118672,
+      "observed_max": 1.4888397339054653
+    },
+    "idle_memory_at_most_half_cap": {
+      "threshold": 0.5,
+      "direction": "maximum",
+      "status": "pass",
+      "pass": true,
+      "observed_min": 0.07037949728930508,
+      "observed_median": 0.07253847671665352,
+      "observed_max": 0.07275980319069629
+    },
+    "ga_scope_pass": false
+  },
+  "raw_results": ["rust-1.json", "rust-2.json", "rust-3.json"]
+}

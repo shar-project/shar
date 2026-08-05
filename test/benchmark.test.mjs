@@ -374,6 +374,7 @@ test("isolated standalone benchmark fails closed around server evidence", async 
   assert.match(isolated, /authenticated_remote_rss: true/);
   assert.match(isolated, /isolated_latency_constrained/);
   assert.match(isolated, /request_floor_at_most_5ms/);
+  assert.match(isolated, /qualifyRawServerGates/);
   assert.match(isolated, /host_controller_sha256/);
   assert.match(isolated, /admin_index_sha256/);
   assert.match(isolated, /server-host artifact digest differs/);
@@ -528,6 +529,51 @@ test("published RSW standalone evidence is separate and passes every native run"
     summary.local_native_thresholds.throughput_at_least_2x_cap.status,
     "pass",
   );
+});
+
+test("published isolated RSW evidence preserves its latency-constrained scope", async () => {
+  const summary = await json(
+    "bench/cap/results/rsw/isolated/isolated-standalone-comparison.json",
+  );
+  assert.equal(summary.schema, "shar-cap-isolated-standalone-comparison-v1");
+  assert.equal(summary.scope.status, "isolated_latency_constrained");
+  assert.equal(summary.inputs.repetitions, 3);
+  assert.equal(summary.inputs.issue_operations, 3_000);
+  assert.equal(summary.inputs.concurrency, 32);
+  assert.equal(summary.inputs.http_client_workers, 8);
+  assert.equal(summary.inputs.cap_settings.rsw, true);
+  assert.equal(summary.raw_results.length, 3);
+  assert.equal(summary.topology_quality.request_floor_at_most_5ms.pass, false);
+  assert.ok(summary.topology_quality.request_floor_ms.min > 5);
+  assert.equal(
+    summary.native_thresholds.idle_memory_at_most_half_cap.pass,
+    true,
+  );
+  assert.equal(summary.native_thresholds.ga_scope_pass, false);
+
+  for (const file of summary.raw_results) {
+    const result = await json(`bench/cap/results/rsw/isolated/${file}`);
+    assert.equal(
+      result.isolated_deployment.schema,
+      "shar-cap-isolated-deployment-v1",
+    );
+    assert.equal(
+      result.ga_gates.server_throughput_and_memory.status,
+      "isolated_latency_constrained",
+    );
+    assert.deepEqual(result.inputs.rss_sources, {
+      SHAR_BENCH_PID: "remote_control",
+      CAP_BENCH_PID: "remote_control",
+    });
+    assert.equal(
+      result.isolated_deployment.assertions.local_and_remote_artifacts_match,
+      true,
+    );
+    assert.doesNotMatch(
+      JSON.stringify(result),
+      /ssh\.soccera|192\.168\.|control_token|Bearer /i,
+    );
+  }
 });
 
 test("published pinned Cap behavior matrix covers policy and verification modes", async () => {

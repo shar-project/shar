@@ -29,9 +29,12 @@ The following are deliberately not represented as complete:
 - complete the pinned Cap `standalone@3.1.8` / `widget@0.1.56` benchmark matrix:
   the local standalone harness and raw native/JavaScript throughput/idle-memory
   evidence now exist. The protocol-matched local RSW runs pass the native 2x
-  threshold, while the historical unlike SHA/RSW comparison does not; reproduce
-  the matched result under isolated deployment conditions before accepting the
-  gate.
+  threshold, while the historical unlike SHA/RSW comparison does not. A
+  three-run two-host RSW result now validates loopback-only SSH transport,
+  artifact identity, remote RSS, and 0.070x-0.073x native/Cap idle memory, but
+  its 14.5-20.0 ms request floor dominates throughput and is explicitly marked
+  `isolated_latency_constrained`; reproduce it across two low-latency hosts
+  before accepting the native throughput gate.
   Reference-device latency/energy, GPU/CSS speedup, sustained-abuse economics,
   and the remaining device/browser matrix also remain. Artifact, Chromium
   cold-path byte, three-engine desktop keyboard/reflow/reduced-motion/

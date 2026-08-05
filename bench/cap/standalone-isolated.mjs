@@ -104,6 +104,7 @@ try {
     }
   }
   const summary = summarize();
+  qualifyRawServerGates(summary);
   for (const { variant, repetition, result } of rows)
     await writeJson(
       join(outputDirectory, `${variant}-${repetition}.json`),
@@ -225,9 +226,9 @@ async function benchmarkPair(variant, repetition) {
     };
     result.idle_memory = announced.idle_memory;
     result.ga_gates.server_throughput_and_memory = {
-      status: "isolated_candidate",
+      status: "requires_topology_qualification",
       reason:
-        "separate load-generator/server hosts, fresh processes, matching state profile, stabilized server-host RSS, and authenticated in-load RSS sampling were validated",
+        "the enclosing isolated summary must qualify the request-latency floor across every repetition before this result has GA scope",
     };
     await writeJson(output, result);
     return result;
@@ -442,6 +443,23 @@ function summarize() {
       ({ variant, repetition }) => `${variant}-${repetition}.json`,
     ),
   };
+}
+
+function qualifyRawServerGates(summary) {
+  const lowLatency = summary.topology_quality.request_floor_at_most_5ms.pass;
+  for (const row of rows) {
+    row.result.ga_gates.server_throughput_and_memory = lowLatency
+      ? {
+          status: "isolated_candidate",
+          reason:
+            "separate hosts, matching state, stabilized remote RSS, artifact identity, and the all-run request-latency floor were validated",
+        }
+      : {
+          status: "isolated_latency_constrained",
+          reason:
+            "separate-host process and memory evidence is valid, but the all-run request floor exceeds 5 ms and cannot establish the native throughput gate",
+        };
+  }
 }
 
 async function hostAnnouncement(child, stderr) {

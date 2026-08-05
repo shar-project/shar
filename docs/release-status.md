@@ -671,10 +671,20 @@ On x86_64 with Rust/Cargo 1.94.0 and Node 26.3.0:
   every run at 2.35x-2.68x, though it publishes a separate platform benchmark
   rather than inheriting the native gate. The
   JavaScript pairing exceeded the variance warning because one Cap sample was
-  an outlier, so it supports no comparative throughput conclusion. All results
-  are retained as local reference evidence, not a production or multi-host
-  benchmark; the protocol-matched local RSW gate passes, but throughput must still
-  be repeated on an isolated load-generator/server setup before GA.
+  an outlier, so it supports no comparative throughput conclusion. The new
+  isolated runner stages a clean revision to a distinct non-loopback SSH host,
+  keeps Cap, Shar, and its bearer-authenticated RSS controller on server
+  loopback, verifies executable/controller/admin/Cap digests, and publishes
+  only complete all-run output. A sustained three-run RSW result issued 3,000
+  challenges per product at concurrency 32. It validated remote process and
+  memory evidence: native RSS was 0.070x-0.073x of Cap with low variance. Its
+  14.5-20.0 ms minimum request floor failed the harness's <=5 ms topology gate,
+  so the observed 1.26x-1.49x WAN throughput ratios are retained as
+  `isolated_latency_constrained`, not promoted to the native server gate. The
+  run also exposed a hidden hardcoded ten-operation Rust state admission cap;
+  that path is now bounded by the smaller of the configured request cap and 64,
+  keeps timed-out permits until work exits, and handles the matched 32-request
+  burst without retries. A low-latency two-host reproduction remains required.
 - a separate fresh-process Cap behavior matrix now covers SHA and RSW challenge
   redemption, single-use final site verification, instrumentation rejection,
   non-browser UA rejection, configured rate limiting, invalid-proof failure,
