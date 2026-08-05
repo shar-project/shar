@@ -102,8 +102,13 @@ async function requestAt(localIndex) {
   } catch {
     throw new Error(`${product} returned a non-JSON issuance response`);
   }
-  if (response.status !== 200 || !parsed || typeof parsed !== "object")
-    throw new Error(`${product} issuance returned ${response.status}`);
+  if (response.status !== 200 || !parsed || typeof parsed !== "object") {
+    const code =
+      typeof parsed?.code === "string" && /^[a-z0-9_]{1,64}$/.test(parsed.code)
+        ? ` (${parsed.code})`
+        : "";
+    throw new Error(`${product} issuance returned ${response.status}${code}`);
+  }
   return {
     elapsed_ms: response.elapsed_ms,
     body_bytes: response.bytes.byteLength,

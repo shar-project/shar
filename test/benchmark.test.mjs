@@ -311,6 +311,7 @@ test("live benchmark refuses to manufacture unavailable GA evidence", async () =
   assert.match(worker, /JSON\.parse\(text\)/);
   assert.match(worker, /elapsed_ms: response\.elapsed_ms/);
   assert.match(worker, /body_bytes: response\.bytes\.byteLength/);
+  assert.match(worker, /parsed\?\.code/);
   assert.match(source, /keepAlive: true/);
   assert.match(source, /maxSockets: concurrency/);
   assert.match(source, /response\.bytes\.byteLength/);
