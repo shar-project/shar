@@ -5,6 +5,12 @@ audited or deploy it as the only control protecting a high-value operation.
 The no-policy-rejection invariant is intentional and is not a vulnerability:
 a valid, unexpired proof must succeed regardless of client classification.
 
+Every pull request, main-branch update, and release preflight runs a
+checksum-pinned Gitleaks scan over all reachable Git history. Output is fully
+redacted. The only ignored findings are exact fingerprints for four reviewed,
+deterministic protocol/browser fixtures; copying any value or introducing the
+same pattern in a new commit is scanned again.
+
 Please report suspected vulnerabilities privately through GitHub Security
 Advisories for `shar-project/shar`. Include affected versions, reproduction
 steps, impact, and any suggested mitigation. Do not include secrets, raw client

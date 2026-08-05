@@ -720,8 +720,10 @@ commits.
 GitHub provider secret scanning, push protection, vulnerability alerts,
 Dependabot security updates, and private vulnerability reporting are enabled.
 GitHub reports non-provider pattern scanning and validity checks as disabled for
-this repository, so the one-time generic full-history scan is publication
-evidence rather than a substitute for a future continuous generic-secret gate.
+this repository. CI and release preflight therefore run checksum-pinned
+Gitleaks 8.30.1 over all reachable Git history with fully redacted output. The
+four reviewed deterministic fixtures are ignored by exact commit/path/rule/line
+fingerprints, so copied values and future occurrences remain detectable.
 
 ## Open release blockers
 

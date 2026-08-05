@@ -19,6 +19,8 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: 24
@@ -32,6 +34,7 @@ jobs:
       - run: npm run check:deployments
       - run: npm run check:base-images
       - run: npm run check:workflows
+      - run: npm run check:secrets
       - name: Validate the production observation collector
         run: docker run --rm --user 10001:10001 -v "$PWD/deploy/observability:/etc/shar-observability:ro" docker.io/grafana/alloy:v1.14.0@sha256:f50931848bd8178774521767bb46b905e1a081301950ff28d7623c9db7c01076 validate /etc/shar-observability/alloy-config.alloy
       - run: npm test

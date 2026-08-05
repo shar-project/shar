@@ -32,6 +32,7 @@
     "check:base-images": "node scripts/check-base-images.mjs",
     "check:workflows": "node scripts/check-workflows.mjs",
     "check:docs": "node scripts/check-docs.mjs",
+    "check:secrets": "bash scripts/check-secrets.sh",
     "test": "npm run build && node --test test/*.test.mjs",
     "test:interop": "npm run build && node test/interop.mjs",
     "test:standalone-interop": "bash test/standalone-interop.sh",
