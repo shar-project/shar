@@ -59,6 +59,8 @@ struct AppState {
     metrics: Arc<Metrics>,
     request_log: bool,
     max_concurrent_requests: u64,
+    state_timeout: Duration,
+    state_admission: Arc<Admission>,
     request_body_timeout: Duration,
     readiness_admission: Arc<Admission>,
     admin_assets: Arc<PathBuf>,
@@ -513,6 +515,8 @@ async fn main() {
         metrics,
         request_log,
         max_concurrent_requests,
+        state_timeout,
+        state_admission: Arc::new(Admission::new(10)),
         request_body_timeout,
         readiness_admission: Arc::new(Admission::new(1)),
         admin_assets: Arc::new(admin_assets),
@@ -1117,7 +1121,13 @@ async fn ready(State(state): State<AppState>) -> Result<Response, ApiError> {
         )
     })?;
     let engine = state.engine.clone();
-    blocking_engine(None, move || engine.ready()).await?;
+    blocking_state(
+        &state,
+        None,
+        unavailable("readiness_unavailable"),
+        move || engine.ready(),
+    )
+    .await?;
     Ok((
         [("cache-control", "no-store")],
         Json(json!({"status":"ready"})),
@@ -1250,9 +1260,12 @@ async fn admin_policy(
     let tenant = scope.tenant.clone();
     let site_key = scope.site_key.clone();
     let action = scope.action.clone();
-    let policy = blocking_engine(None, move || {
-        engine.admin_policy(&tenant, &site_key, &action)
-    })
+    let policy = blocking_state(
+        &state,
+        None,
+        unavailable("config_store_unavailable"),
+        move || engine.admin_policy(&tenant, &site_key, &action),
+    )
     .await?;
     Ok(Json(admin_policy_value(&scope, &policy)))
 }
@@ -1280,7 +1293,7 @@ async fn admin_audit(
     let audit_tenant = tenant.clone();
     let audit_site_key = site_key.clone();
     let audit_action = action.clone();
-    let events = blocking_engine(None, move || {
+    let events = blocking_state(&state, None, unavailable("audit_unavailable"), move || {
         engine.admin_audit(&audit_tenant, &audit_site_key, &audit_action, limit)
     })
     .await?;
@@ -1322,9 +1335,12 @@ async fn set_admin_policy(
     let site_key = document.site_key.clone();
     let action = document.action.clone();
     let policy_to_write = policy.clone();
-    blocking_engine(None, move || {
-        engine.set_admin_policy(&tenant, &site_key, &action, &policy_to_write)
-    })
+    blocking_state(
+        &state,
+        None,
+        unavailable("config_store_unavailable"),
+        move || engine.set_admin_policy(&tenant, &site_key, &action, &policy_to_write),
+    )
     .await?;
     let scope = AdminScope {
         tenant: document.tenant,
@@ -1460,9 +1476,12 @@ async fn challenge(
     seed.copy_from_slice(&random[16..]);
     let engine = state.engine.clone();
     let engine_started = Instant::now();
-    let response = blocking_engine(origin.clone(), move || {
-        engine.issue(&parsed, issued_at, nonce, seed)
-    })
+    let response = blocking_state(
+        &state,
+        origin.clone(),
+        unavailable("pricing_unavailable"),
+        move || engine.issue(&parsed, issued_at, nonce, seed),
+    )
     .await?;
     record_duration(&state.metrics.issue_engine_micros, engine_started.elapsed());
     state.metrics.issued.fetch_add(1, Ordering::Relaxed);
@@ -1486,9 +1505,12 @@ async fn redeem(
     getrandom::fill(&mut nonce).map_err(|_| internal(origin.clone()))?;
     let engine = state.engine.clone();
     let completed_at = now();
-    let result = blocking_engine(origin.clone(), move || {
-        engine.redeem(&parsed, completed_at, nonce)
-    })
+    let result = blocking_state(
+        &state,
+        origin.clone(),
+        unavailable("nonce_store_unavailable"),
+        move || engine.redeem(&parsed, completed_at, nonce),
+    )
     .await?;
     state.metrics.redeemed.fetch_add(1, Ordering::Relaxed);
     let mut response = Json(result).into_response();
@@ -1531,7 +1553,13 @@ async fn siteverify(
     parsed.site_key = Some(site_key);
     let engine = state.engine.clone();
     let verified_at = now();
-    let result = blocking_engine(None, move || engine.siteverify(&parsed, verified_at)).await?;
+    let result = blocking_state(
+        &state,
+        None,
+        unavailable("nonce_store_unavailable"),
+        move || engine.siteverify(&parsed, verified_at),
+    )
+    .await?;
     state.metrics.verified.fetch_add(1, Ordering::Relaxed);
     let mut value = serde_json::to_value(result).map_err(|_| internal(None))?;
     if form {
@@ -1715,6 +1743,15 @@ fn error(status: u16, code: &'static str, retryable: bool, next_action: &'static
         retry_after: None,
     }
 }
+fn unavailable(code: &'static str) -> SharError {
+    SharError {
+        status: 503,
+        code,
+        retryable: true,
+        next_action: "retry",
+        retry_after: Some(1),
+    }
+}
 async fn fallback(
     State(state): State<AppState>,
     request: HttpRequest<Body>,
@@ -1740,9 +1777,12 @@ async fn fallback(
     let parsed: FallbackCompletionRequest = parse_json(&headers, &bytes, None)?;
     let engine = state.engine.clone();
     let completed_at = now();
-    let result = blocking_engine(None, move || {
-        engine.complete_fallback(&parsed, completed_at)
-    })
+    let result = blocking_state(
+        &state,
+        None,
+        unavailable("fallback_unavailable"),
+        move || engine.complete_fallback(&parsed, completed_at),
+    )
     .await?;
     state.metrics.fallback.fetch_add(1, Ordering::Relaxed);
     Ok(Json(
@@ -1785,6 +1825,7 @@ fn internal(origin: Option<String>) -> ApiError {
     )
 }
 
+#[cfg(test)]
 async fn blocking_engine<T, F>(origin: Option<String>, operation: F) -> Result<T, ApiError>
 where
     T: Send + 'static,
@@ -1795,6 +1836,33 @@ where
         .await
         .map_err(|_| internal(join_origin))?
         .map_err(|error| ApiError::new(error, origin))
+}
+
+async fn blocking_state<T, F>(
+    state: &AppState,
+    origin: Option<String>,
+    timeout_error: SharError,
+    operation: F,
+) -> Result<T, ApiError>
+where
+    T: Send + 'static,
+    F: FnOnce() -> Result<T, SharError> + Send + 'static,
+{
+    let permit = state
+        .state_admission
+        .try_enter()
+        .ok_or_else(|| ApiError::new(timeout_error.clone(), origin.clone()))?;
+    let join_origin = origin.clone();
+    let task = tokio::task::spawn_blocking(move || {
+        let _permit = permit;
+        operation()
+    });
+    match tokio::time::timeout(state.state_timeout, task).await {
+        Ok(joined) => joined
+            .map_err(|_| internal(join_origin))?
+            .map_err(|error| ApiError::new(error, origin)),
+        Err(_) => Err(ApiError::new(timeout_error, origin)),
+    }
 }
 
 struct ApiError {
@@ -2434,6 +2502,8 @@ mod http_tests {
             metrics: Arc::new(Metrics::default()),
             request_log: false,
             max_concurrent_requests: 256,
+            state_timeout: Duration::from_secs(5),
+            state_admission: Arc::new(Admission::new(10)),
             request_body_timeout: Duration::from_secs(15),
             readiness_admission: Arc::new(Admission::new(1)),
             admin_assets: Arc::new(admin_assets),
@@ -2534,6 +2604,60 @@ mod http_tests {
         .unwrap_err();
         assert_eq!(unavailable.error.code, "pricing_unavailable");
         assert_eq!(unavailable.error.retry_after, Some(1));
+    }
+
+    #[tokio::test(flavor = "current_thread")]
+    async fn state_deadline_retains_admission_until_blocking_work_finishes() {
+        let (_app, mut state, _directory) = test_app();
+        state.state_timeout = Duration::from_millis(10);
+        state.state_admission = Arc::new(Admission::new(1));
+        let release = Arc::new(std::sync::atomic::AtomicBool::new(false));
+        let operation_release = release.clone();
+        let timed_out = blocking_state(
+            &state,
+            None,
+            unavailable("pricing_unavailable"),
+            move || {
+                while !operation_release.load(Ordering::Acquire) {
+                    std::thread::yield_now();
+                }
+                Ok::<_, SharError>(())
+            },
+        )
+        .await
+        .unwrap_err();
+        assert_eq!(timed_out.error.code, "pricing_unavailable");
+        assert_eq!(timed_out.error.retry_after, Some(1));
+
+        let saturated =
+            blocking_state(
+                &state,
+                None,
+                unavailable("readiness_unavailable"),
+                || Ok(()),
+            )
+            .await
+            .unwrap_err();
+        assert_eq!(saturated.error.code, "readiness_unavailable");
+
+        release.store(true, Ordering::Release);
+        for _ in 0..100 {
+            if state.state_admission.active.load(Ordering::Acquire) == 0 {
+                break;
+            }
+            tokio::time::sleep(Duration::from_millis(1)).await;
+        }
+        assert_eq!(state.state_admission.active.load(Ordering::Acquire), 0);
+        assert!(
+            blocking_state(
+                &state,
+                None,
+                unavailable("readiness_unavailable"),
+                || Ok(())
+            )
+            .await
+            .is_ok()
+        );
     }
 
     #[tokio::test]

@@ -489,8 +489,17 @@ On x86_64 with Rust/Cargo 1.94.0 and Node 26.3.0:
   replay. Rust PostgreSQL pool entries also replace closed clients before use;
   a live PostgreSQL regression terminates the actual backend PID, proves the
   observing probe fails without replay, and proves the next probe succeeds on a
-  newly configured client. Managed-service failover,
-  partition, TLS, and genuinely separate-host races remain open.
+  newly configured client. A deterministic fault proxy now severs every live
+  PostgreSQL and Redis connection, silently blackholes new connections, and
+  then restores both services while the optimized Rust and JavaScript
+  standalones remain running. Both preserve liveness, return the exact bounded
+  readiness/pricing 503 contracts during the partition, and recover challenge
+  issuance afterward. This caught an unhandled JavaScript PostgreSQL pool error
+  and an unbounded Rust PostgreSQL handshake. The JavaScript pool now logs idle
+  connection failures without crashing; Rust applies the configured state
+  deadline to blocking operations and retains bounded admission until detached
+  work actually finishes. Managed-service replicated failover, production TLS,
+  and broader genuinely separate-host races remain open.
 - both standalone servers expose the same scoped work-policy API behind an
   independent 32-byte admin bearer secret and serve responsive React policy,
   operations, and privacy-filtered scoped audit views at `/admin/`. Rust and
@@ -713,9 +722,10 @@ The authoritative incomplete list is in `roadmap.md`. Current rendering
 evidence covers three desktop engine families, SwiftShader, Mesa llvmpipe, one
 physical Intel Iris Xe, and one physical AMD Van Gogh Steam Deck, but not the
 required NVIDIA, Apple, Adreno, wider mobile, and shipping-browser version
-matrix. PostgreSQL and Redis now have a two-host shared-state/restart run, but
-not a replicated-service failover or network-partition recovery run, and the
-external RFC 9578 trust-credit profile remains unreviewed. Production
+matrix. PostgreSQL and Redis now have a two-host shared-state/restart run plus a
+local deterministic complete-connection blackhole/recovery run, but not a
+replicated-service failover run against target managed stores and proxies; the
+external RFC 9578 trust-credit profile also remains unreviewed. Production
 method-specific host fallback deployments, the first externally verified
 SBOM/signing publication,
 a passing isolated Cap native-throughput result, reference-device

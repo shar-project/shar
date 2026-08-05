@@ -460,6 +460,10 @@ test("standalones apply bounded state deadlines to every durable adapter", async
     "busyTimeoutMilliseconds: stateTimeoutMilliseconds",
   ])
     assert.match(javascript, new RegExp(setting.replace(/[{}]/g, "\\$&")));
+  assert.match(
+    javascript,
+    /pool\.on\("error",[\s\S]*PostgreSQL connection error:/,
+  );
 
   const rust = await readFile(
     new URL("../crates/shar-server/src/main.rs", import.meta.url),
@@ -467,6 +471,8 @@ test("standalones apply bounded state deadlines to every durable adapter", async
   );
   assert.match(rust, /connect_timeout\(state_timeout\)/);
   assert.match(rust, /spawn_blocking\(move \|\| load_stores/);
+  assert.match(rust, /tokio::time::timeout\(state\.state_timeout, task\)/);
+  assert.match(rust, /state_admission: Arc<Admission>/);
   assert.match(rust, /statement_timeout=\{timeout_ms\}/);
   assert.match(rust, /PostgresStore::from_clients_with_reconnect/);
   assert.match(

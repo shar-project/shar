@@ -500,6 +500,9 @@ if (process.env.SHAR_POSTGRES_URL) {
     lock_timeout: stateTimeoutMilliseconds,
     idle_in_transaction_session_timeout: stateTimeoutMilliseconds,
   });
+  pool.on("error", (error) =>
+    console.error(`PostgreSQL connection error: ${error.message}`),
+  );
   const postgres = new PostgresStore(pool);
   await postgres.migrate();
   configStore = postgres;

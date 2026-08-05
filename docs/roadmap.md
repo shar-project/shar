@@ -8,8 +8,10 @@ The following are deliberately not represented as complete:
   SwiftShader, Mesa llvmpipe, and a GPU-disabled browser without treating
   software fallback as hardware;
 - independent review of production 2048-bit key generation and verification;
-- live multi-host, failover, and network-partition validation of the dual
-  PostgreSQL and Redis-compatible atomic adapters;
+- replicated-service failover, TLS, and broader multi-host validation of the
+  dual PostgreSQL and Redis-compatible atomic adapters; deterministic complete
+  connection blackholes and recovery now run against both real standalones in
+  CI, but do not substitute for the target managed services and proxies;
 - an independently reviewed RFC 9578 deployment profile for the currently
   implemented RFC 9497/Ristretto255 blinded trust-credit primitive, plus the
   production assurance-retention review;
