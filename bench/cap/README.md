@@ -148,6 +148,14 @@ memory are excluded, although server-local Redis contention is not. The result
 therefore remains separate from browser latency, device energy, managed-store
 failover, and attacker-economics evidence.
 
+The summary accepts the native throughput threshold as GA-scope evidence only
+when the minimum end-to-end request latency is at most 5 ms in every run. A
+higher request floor marks the result `isolated_latency_constrained`: the raw
+throughput and memory measurements remain useful, but transport latency can
+hide the server-capacity ratio. Use two hosts on the same low-latency network
+rather than increasing concurrency until either server's admission limit is
+hit.
+
 ## Cap behavior matrix
 
 The throughput profile defaults to the historical SHA setting and can run the

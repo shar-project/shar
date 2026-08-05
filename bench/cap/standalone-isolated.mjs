@@ -313,6 +313,13 @@ function validateLiveResult(result) {
 }
 
 function summarize() {
+  const requestFloors = rows.map((row) =>
+    Math.min(
+      row.result.issuance.shar.latency.min_ms,
+      row.result.issuance.cap.latency.min_ms,
+    ),
+  );
+  const lowLatencyTopology = evaluateAllRunGate(requestFloors, 5, "maximum");
   const variants = Object.fromEntries(
     variantsRequested.map((variant) => {
       const selected = rows.filter((row) => row.variant === variant);
@@ -373,12 +380,22 @@ function summarize() {
       row.result.idle_memory.shar_rss_bytes /
       row.result.idle_memory.cap_rss_bytes,
   );
+  const throughputGate =
+    nativeRows.length > 0
+      ? evaluateAllRunGate(nativeThroughputRatios, 2, "minimum")
+      : undefined;
+  const memoryGate =
+    nativeRows.length > 0
+      ? evaluateAllRunGate(nativeIdleRatios, 0.5, "maximum")
+      : undefined;
   return {
     schema: "shar-cap-isolated-standalone-comparison-v1",
     captured_at: new Date().toISOString(),
     revision,
     scope: {
-      status: "isolated_candidate_evidence",
+      status: lowLatencyTopology.pass
+        ? "isolated_candidate_evidence"
+        : "isolated_latency_constrained",
       cap: "standalone@3.1.8",
       shar_variants: variantsRequested,
       topology:
@@ -405,19 +422,19 @@ function summarize() {
       cap_settings: capSettings,
     },
     variants,
+    topology_quality: {
+      request_floor_ms: numericDistribution(requestFloors),
+      request_floor_at_most_5ms: lowLatencyTopology,
+      reason:
+        "a higher floor lets transport latency dominate both products and cannot establish the native server-throughput gate",
+    },
     native_thresholds:
       nativeRows.length > 0
         ? {
-            throughput_at_least_2x_cap: evaluateAllRunGate(
-              nativeThroughputRatios,
-              2,
-              "minimum",
-            ),
-            idle_memory_at_most_half_cap: evaluateAllRunGate(
-              nativeIdleRatios,
-              0.5,
-              "maximum",
-            ),
+            throughput_at_least_2x_cap: throughputGate,
+            idle_memory_at_most_half_cap: memoryGate,
+            ga_scope_pass:
+              lowLatencyTopology.pass && throughputGate.pass && memoryGate.pass,
           }
         : { status: "not_measured" },
     raw_results: rows.map(
