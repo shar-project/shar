@@ -19,8 +19,9 @@ Every container `FROM` reference is pinned to a multi-architecture manifest
 index, not an architecture-specific child manifest. The registry-backed
 `check:base-images` gate requires every pin to expose both linux/amd64 and
 linux/arm64. Dependabot proposes digest refreshes weekly. CI and the protected-tag
-workflow build each amd64 and arm64 image as a platform-specific OCI archive in
-a read-only, credential-free job, retain a full Grype report for every archive
+workflow build each amd64 and arm64 image as a platform-specific Docker archive
+on a matching native GitHub-hosted architecture in a read-only, credential-free
+job, retain a full Grype report for every archive
 (including upstream-unfixed findings), and fail before the credential-bearing
 publication job when a high or critical vulnerability has an available fix.
 Do not bypass this gate. Review unfixed findings as part of the release record

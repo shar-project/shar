@@ -44,11 +44,19 @@ function requireContainerGate(name, text) {
   );
   assert.equal(security.match(/arch: amd64/g)?.length, 2);
   assert.equal(security.match(/arch: arm64/g)?.length, 2);
+  assert.equal(security.match(/runner: ubuntu-24\.04$/gm)?.length, 2);
+  assert.equal(security.match(/runner: ubuntu-24\.04-arm$/gm)?.length, 2);
+  assert.match(security, /runs-on: \$\{\{ matrix\.runner \}\}/);
+  assert.doesNotMatch(security, /docker\/setup-qemu-action/);
+  assert.match(security, /platforms: linux\/\$\{\{ matrix\.arch \}\}/);
   assert.match(
     security,
-    /docker\/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130/,
+    /cache-from: type=gha,scope=security-\$\{\{ matrix\.image \}\}-\$\{\{ matrix\.arch \}\}/,
   );
-  assert.match(security, /platforms: linux\/\$\{\{ matrix\.arch \}\}/);
+  assert.match(
+    security,
+    /cache-to: type=gha,scope=security-\$\{\{ matrix\.image \}\}-\$\{\{ matrix\.arch \}\},mode=max/,
+  );
   assert.match(security, /outputs: type=docker,dest=/);
   assert.match(security, /image: docker-archive:/);
   assert.match(security, /provenance: false/);
@@ -110,7 +118,19 @@ function requireContainerGate(name, text) {
     assert.match(packages, /--certificate-oidc-issuer "\$OIDC_ISSUER"/);
     assert.doesNotMatch(packages, /- run: npm (?:pack|test|ci)(?:\s|$)/);
     assert.match(security, /needs: preflight/);
-    assert.match(containers, /needs: container-security/);
+    assert.match(containers, /needs: \[container-security, packages\]/);
+    assert.match(
+      containers,
+      /docker\/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130/,
+    );
+    assert.match(
+      containers,
+      /cache-from: type=gha,scope=release-\$\{\{ matrix\.image \}\}/,
+    );
+    assert.match(
+      containers,
+      /cache-to: type=gha,scope=release-\$\{\{ matrix\.image \}\},mode=max/,
+    );
     assert.match(containers, /platforms: linux\/amd64,linux\/arm64/);
     assert.match(containers, /provenance: mode=max/);
     assert.match(containers, /cosign verify --certificate-identity/);
@@ -144,6 +164,11 @@ requirePinnedActions("CI", ci);
 requirePinnedActions("release", release);
 requireContainerGate("CI", ci);
 requireContainerGate("release", release);
+assert.match(
+  release,
+  /^concurrency:\n  group: release\n  cancel-in-progress: false$/m,
+  "release runs must serialize without cancelling an in-flight publication",
+);
 assert.match(
   ci,
   /^on:\n  push:\n    branches: \[main\]\n  pull_request:\n/m,

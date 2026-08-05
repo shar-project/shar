@@ -4,6 +4,10 @@ on:
   push:
     tags: ["v*.*.*"]
 
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 permissions:
   contents: read
 
@@ -93,7 +97,7 @@ jobs:
   container-security:
     name: Pre-publish ${{ matrix.image }} ${{ matrix.arch }} vulnerability gate
     needs: preflight
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
     strategy:
@@ -103,18 +107,21 @@ jobs:
           - image: rust
             dockerfile: deploy/docker/Dockerfile.rust
             arch: amd64
+            runner: ubuntu-24.04
           - image: rust
             dockerfile: deploy/docker/Dockerfile.rust
             arch: arm64
+            runner: ubuntu-24.04-arm
           - image: javascript
             dockerfile: deploy/docker/Dockerfile.javascript
             arch: amd64
+            runner: ubuntu-24.04
           - image: javascript
             dockerfile: deploy/docker/Dockerfile.javascript
             arch: arm64
+            runner: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-      - uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
       - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
       - name: Build the exact platform as a Docker archive without publishing
         uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
@@ -125,8 +132,8 @@ jobs:
           outputs: type=docker,dest=${{ runner.temp }}/shar-release-security-${{ matrix.image }}-${{ matrix.arch }}.tar
           provenance: false
           push: false
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=security-${{ matrix.image }}-${{ matrix.arch }}
+          cache-to: type=gha,scope=security-${{ matrix.image }}-${{ matrix.arch }},mode=max
       - id: complete-vulnerability-report
         name: Report all vulnerabilities, including upstream-unfixed findings
         uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2 # v7.4.0
@@ -153,7 +160,7 @@ jobs:
 
   containers:
     name: Publish ${{ matrix.image }} container
-    needs: container-security
+    needs: [container-security, packages]
     runs-on: ubuntu-24.04
     environment: release
     strategy:
@@ -204,8 +211,8 @@ jobs:
           labels: ${{ steps.metadata.outputs.labels }}
           provenance: mode=max
           sbom: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=release-${{ matrix.image }}
+          cache-to: type=gha,scope=release-${{ matrix.image }},mode=max
       - uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3
         with:
           subject-name: ${{ steps.image.outputs.name }}
