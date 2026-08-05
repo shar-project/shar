@@ -1,5 +1,8 @@
 # Shar protocol v1
 
+This document is the normative protocol reference. New integrators should begin
+with the [quickstart](quickstart.md) and [architecture overview](architecture.md).
+
 ## Normative invariant
 
 For every supported and syntactically valid challenge request, the work pricer

@@ -28,6 +28,7 @@ jobs:
       - run: scripts/build-widget-wasm.sh --check
       - run: npm ci --ignore-scripts
       - run: node scripts/check-release.mjs "$GITHUB_REF_NAME"
+      - run: npm run check:docs
       - run: npm run check:deployments
       - run: npm run check:base-images
       - run: npm run check:workflows

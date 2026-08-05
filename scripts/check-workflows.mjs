@@ -190,6 +190,8 @@ assert.match(job(ci, "packages"), /npm run check:base-images/);
 assert.match(job(release, "preflight"), /npm run check:base-images/);
 const packages = job(ci, "packages");
 const releasePreflight = job(release, "preflight");
+assert.match(packages, /npm run check:docs/);
+assert.match(releasePreflight, /npm run check:docs/);
 for (const source of [packages, releasePreflight]) {
   assert.match(
     source,

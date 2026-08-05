@@ -255,6 +255,7 @@ jobs:
           package-manager-cache: false
       - run: npm ci --ignore-scripts
       - run: npm run format:check
+      - run: npm run check:docs
       - run: npm run check:deployments
       - run: npm run check:base-images
       - run: npm run check:workflows
