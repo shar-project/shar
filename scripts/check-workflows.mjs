@@ -86,7 +86,7 @@ function requireContainerGate(name, text) {
     assert.match(preflight, /npm pack --workspaces --pack-destination release/);
     assert.match(
       preflight,
-      /cd release && sha256sum \*\.tgz \*\.cdx\.json > SHA256SUMS/,
+      /cd release && sha256sum \.\/\*\.tgz \.\/\*\.cdx\.json > SHA256SUMS/,
     );
     assert.match(
       preflight,

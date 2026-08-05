@@ -35,7 +35,7 @@ jobs:
       - run: npm sbom --workspace=@shar/server --sbom-format=cyclonedx > release/shar-server.cdx.json
       - run: npm sbom --workspace=@shar/widget --sbom-format=cyclonedx > release/shar-widget.cdx.json
       - run: npm sbom --workspace=@shar/cap-compat --sbom-format=cyclonedx > release/shar-cap-compat.cdx.json
-      - run: cd release && sha256sum *.tgz *.cdx.json > SHA256SUMS
+      - run: cd release && sha256sum ./*.tgz ./*.cdx.json > SHA256SUMS
       - run: cd release && sha256sum --check SHA256SUMS
       - name: Install and import the exact package candidates
         run: |
